@@ -11,15 +11,15 @@ import javafx.scene.control.Button;
  */
 public class MyHandler implements EventHandler<ActionEvent> {
 
-	private Button b1;
+	private String farmId;
 	
-	public MyHandler(Button b1) {
-		this.b1 = b1;
+	public MyHandler(String farmId) {
+		this.farmId = farmId;
 	}
 
 	@Override
 	public void handle(ActionEvent arg0) {
-			new FarmStage();
+			new FarmStage(farmId);
 	}
 
 }

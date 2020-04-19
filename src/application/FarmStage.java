@@ -12,11 +12,12 @@ import javafx.stage.Stage;
 
 public class FarmStage extends Stage{
 		BorderPane farmInfo = new BorderPane();
-		Label x = new Label("Farm Number 00");
+		Label farmNum;
 		
 		
-		FarmStage(){
-				this.setTitle("Farm Number 00");
+		FarmStage(String farmID){
+				farmNum = new Label(farmID);
+				this.setTitle(farmID);
 				this.createScene();
 		    this.setScene(new Scene(farmInfo, 400, 400));
 		    this.show();
@@ -26,9 +27,9 @@ public class FarmStage extends Stage{
 		 * This private method is used to create the add stage scene
 		 */
 		private void createScene() {
-				farmInfo.setTop(x);
-				x.setFont(Font.font (50));
-				farmInfo.setAlignment(x, Pos.CENTER);
+				farmInfo.setTop(farmNum);
+				farmNum.setFont(Font.font(40));
+				farmInfo.setAlignment(farmNum, Pos.CENTER);
 		}
 
 }

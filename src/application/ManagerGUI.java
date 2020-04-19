@@ -99,11 +99,12 @@ public class ManagerGUI extends Application {
 
 		root1.setCenter(hboxTextFields);
 		
-		// set up the EventHandler for addStage
-		farmStage(addButton);
-		farmStage(removeButton);
-		farmStage(editButton);
-		farmStage(displayButton);
+		// create new pop up windows taking text input
+		addButton.setOnAction(e -> new FarmStage(farmIDTextField.getText()));
+		removeButton.setOnAction(e -> new FarmStage(farmIDTextField.getText()));
+		editButton.setOnAction(e -> new FarmStage(farmIDTextField.getText()));
+		displayButton.setOnAction(e -> new FarmStage(farmIDTextField.getText()));
+		
 		// Create the main scene
 		Scene mainScene = new Scene(root1, WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -111,10 +112,6 @@ public class ManagerGUI extends Application {
 		primaryStage.setTitle(APP_TITLE);
 		primaryStage.setScene(mainScene);
 		primaryStage.show();
-	}
-	private void farmStage(Button addButton) {
-		MyHandler handler = new MyHandler(addButton);
-		addButton.setOnAction(handler);
 	}
 	/**
 	 * @param args
