@@ -20,8 +20,8 @@ import java.util.ArrayList;
 
 
 public class Farm {
-	ArrayList<Milk> milk;
-	
+	public ArrayList<Milk> milk;
+	public String farmID;
 	/**
 	 * Milk sub-class
 	 */
@@ -59,7 +59,8 @@ public class Farm {
 	/**
 	 * Constructor, initializes milk array list
 	 */
-	public Farm() {
+	public Farm(String farmID) {
+		this.farmID = farmID;
 		milk = new ArrayList<Milk>();
 	}
 	/**
@@ -72,6 +73,9 @@ public class Farm {
 	}
 	public String getDate(int index) {
 		return milk.get(index).getDate();
+	}
+	public int getWeight(int index) {
+		return milk.get(index).getWeight();
 	}
 	
 }

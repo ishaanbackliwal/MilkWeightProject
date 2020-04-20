@@ -38,11 +38,12 @@ public class ManagerGUI extends Application {
 	private static final int WINDOW_WIDTH = 650;
 	private static final int WINDOW_HEIGHT = 500;
 	private static final String APP_TITLE = "Milk Manager";
-	private static final FarmManager manager = new FarmManager();
+	private FarmManager manager = new FarmManager();
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
+		
 		// Buttons
 		Button addButton = new Button("ADD");
 		Button removeButton = new Button("REMOVE");
@@ -59,21 +60,21 @@ public class ManagerGUI extends Application {
 		TextField farmIDTextField = new TextField();
 
 		// Main layout is Border Pane
-		BorderPane root1 = new BorderPane();
-		root1.setPadding(new Insets(30, 30, 200, 30));
+		BorderPane root = new BorderPane();
+		root.setPadding(new Insets(30, 30, 200, 30));
 		
 		// Title horizontal box
 		HBox hboxTitle = new HBox(10);
 		hboxTitle.getChildren().add(tile);
 		hboxTitle.setAlignment(Pos.TOP_CENTER);
-		root1.setTop(hboxTitle);
+		root.setTop(hboxTitle);
 
 		// Button vertical box
 		HBox hboxButtons = new HBox(10);
 		hboxButtons.getChildren().addAll(addButton, removeButton, editButton,
 				displayButton);
 		hboxButtons.setAlignment(Pos.BOTTOM_CENTER);
-		root1.setBottom(hboxButtons);
+		root.setBottom(hboxButtons);
 
 		// File name text field
 		VBox vboxFileName = new VBox(10);
@@ -98,16 +99,16 @@ public class ManagerGUI extends Application {
 		hboxTextFields.getChildren().addAll(vboxFileName, vboxOr, vboxFarmID);
 		hboxTextFields.setAlignment(Pos.BOTTOM_CENTER);
 
-		root1.setCenter(hboxTextFields);
+		root.setCenter(hboxTextFields);
 		
 		// Create new pop up windows taking text input
-		addButton.setOnAction(e -> new FarmStage(farmIDTextField.getText()));
-		removeButton.setOnAction(e -> new FarmStage(farmIDTextField.getText()));
-		editButton.setOnAction(e -> new FarmStage(farmIDTextField.getText()));
-		displayButton.setOnAction(e -> new FarmStage(farmIDTextField.getText()));
+		addButton.setOnAction(e -> new FarmStage(farmIDTextField.getText(), manager));
+		removeButton.setOnAction(e -> new removeStage(farmIDTextField.getText(), manager));
+		editButton.setOnAction(e -> new FarmStage(farmIDTextField.getText(), manager));
+		displayButton.setOnAction(e -> new FarmStage(farmIDTextField.getText(), manager));
 		
 		// Create the main scene
-		Scene mainScene = new Scene(root1, WINDOW_WIDTH, WINDOW_HEIGHT);
+		Scene mainScene = new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 		// Add the stuff and set the primary stage
 		primaryStage.setTitle(APP_TITLE);
