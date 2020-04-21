@@ -71,11 +71,40 @@ public class Farm {
 	public void addMilk(String weight, String date) {
 		milk.add(new Milk(weight, date));
 	}
+	/**
+	 * Removes milk with desired weight and date from the milk array list
+	 * @param weight
+	 * @param date
+	 */
+	public void removeMilk(String weight, String date) {
+		int index = -1;
+		for(int i = 0; i < milk.size(); i++) {
+			if(milk.get(i).getWeight() == Integer.parseInt(weight)) {
+				if(milk.get(i).getDate().compareTo(date) == 0) {
+					index = i;
+					i = milk.size();
+				}
+			}
+		}
+		if(index != -1)
+			milk.remove(index);
+	}
+	/**
+	 * Getter method for date of milk
+	 * @param index
+	 * @return
+	 */
 	public String getDate(int index) {
 		return milk.get(index).getDate();
 	}
+	/**
+	 * Getter method for weight of milk
+	 * @param index
+	 * @return
+	 */
 	public int getWeight(int index) {
 		return milk.get(index).getWeight();
 	}
+	
 	
 }

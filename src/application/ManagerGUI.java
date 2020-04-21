@@ -102,10 +102,10 @@ public class ManagerGUI extends Application {
 		root.setCenter(hboxTextFields);
 		
 		// Create new pop up windows taking text input
-		addButton.setOnAction(e -> new FarmStage(farmIDTextField.getText(), manager));
-		removeButton.setOnAction(e -> new removeStage(farmIDTextField.getText(), manager));
-		editButton.setOnAction(e -> new FarmStage(farmIDTextField.getText(), manager));
-		displayButton.setOnAction(e -> new FarmStage(farmIDTextField.getText(), manager));
+		addButton.setOnAction(e -> new AddStage(farmIDTextField.getText(), manager));
+		removeButton.setOnAction(e -> new RemoveStage(farmIDTextField.getText(), manager));
+		editButton.setOnAction(e -> new AddStage(farmIDTextField.getText(), manager));
+		displayButton.setOnAction(e -> new AddStage(farmIDTextField.getText(), manager));
 		
 		// Create the main scene
 		Scene mainScene = new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
