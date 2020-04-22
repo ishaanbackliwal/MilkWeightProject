@@ -122,6 +122,7 @@ public class RemoveStage extends Stage {
 		}
 		return -1;
 	}
+
 	/**
 	 * This method prints all of the milk info contained within the specified
 	 * farms milk array

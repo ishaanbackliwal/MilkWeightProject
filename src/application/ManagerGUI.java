@@ -54,6 +54,7 @@ public class ManagerGUI extends Application {
 		Button removeButton = new Button("REMOVE");
 		Button editButton = new Button("EDIT");
 		Button displayButton = new Button("DISPLAY");
+		Button outputButton = new Button("OUTPUT");
 
 		// Label texts
 		Text tile = new Text();
@@ -77,7 +78,7 @@ public class ManagerGUI extends Application {
 		// Button vertical box
 		HBox hboxButtons = new HBox(10);
 		hboxButtons.getChildren().addAll(addButton, removeButton, editButton,
-				displayButton);
+				displayButton, outputButton);
 		hboxButtons.setAlignment(Pos.BOTTOM_CENTER);
 		root.setBottom(hboxButtons);
 
@@ -111,6 +112,7 @@ public class ManagerGUI extends Application {
 		removeButton.setOnAction(e -> new RemoveStage(farmIDTextField.getText(), manager));
 		editButton.setOnAction(e -> new AddStage(farmIDTextField.getText(), manager));
 		displayButton.setOnAction(e -> new DisplayStage(farmIDTextField.getText(), manager));
+		outputButton.setOnAction(e -> new OutputStage(manager));
 		
 		// Create the main scene
 		Scene mainScene = new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -140,7 +142,7 @@ public class ManagerGUI extends Application {
 		} else {
 			// otherwise alert the user to add a farm id or file name
 			Alert alert = new Alert(AlertType.WARNING, "Enter a file OR a farm.");
-			alert.setHeaderText("Must enter 1 Farm ID number or 1 file name.");
+			alert.setHeaderText("Must enter a Farm ID number (OR) a file name.");
 			alert.showAndWait();
 		}
 	}
