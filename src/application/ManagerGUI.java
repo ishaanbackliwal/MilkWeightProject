@@ -1,8 +1,4 @@
-/**
- * Milk Manager GUI class
- * Mason Batchelor: mrbatchelor@wisc.edu
- * Ishaan Backliwal: backliwal@wisc.edu
- */
+
 package application;
 
 import java.util.List;
@@ -30,7 +26,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
+/**
+ *  Milk Manager GUI class
+ * This is the primary class that runs our GUI
+ * 
+ * @author Mason Batchelor: mrbatchelor@wisc.edu
+ * 				 Ishaan Backliwal: backliwal@wisc.edu
+ *
+ */
 public class ManagerGUI extends Application {
 	// store any command-line arguments that were entered.
 	// NOTE: this.getParameters().getRaw() will get these also
