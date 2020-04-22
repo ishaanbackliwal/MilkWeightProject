@@ -15,6 +15,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -102,10 +104,10 @@ public class ManagerGUI extends Application {
 		root.setCenter(hboxTextFields);
 		
 		// Create new pop up windows taking text input
-		addButton.setOnAction(e -> new AddStage(farmIDTextField.getText(), manager));
+		addButton.setOnAction(e -> fileOrFarm(farmIDTextField, fileNameTextField));
 		removeButton.setOnAction(e -> new RemoveStage(farmIDTextField.getText(), manager));
 		editButton.setOnAction(e -> new AddStage(farmIDTextField.getText(), manager));
-		displayButton.setOnAction(e -> new AddStage(farmIDTextField.getText(), manager));
+		displayButton.setOnAction(e -> new DisplayStage(farmIDTextField.getText(), manager));
 		
 		// Create the main scene
 		Scene mainScene = new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -114,6 +116,30 @@ public class ManagerGUI extends Application {
 		primaryStage.setTitle(APP_TITLE);
 		primaryStage.setScene(mainScene);
 		primaryStage.show();
+	}
+	private void fileOrFarm(TextField farmNum, TextField newFile) {
+		// get the text from both fields
+		String farmId = farmNum.getText();
+		String farmFile = newFile.getText();
+		// determine which field user has text in
+		if(farmId.equals("") && !farmFile.equals("")) {
+			// if the user has entered a file, parse the file 
+			FileParser parser = new FileParser(farmFile, this.manager);
+			// if parser has no errors let the user know data was added
+			if(parser != null) {
+				Alert alert = new Alert(AlertType.INFORMATION, "All data has been added.");
+				alert.setHeaderText("Confirmed data was added");
+				alert.showAndWait();
+			}
+		} else if(!farmId.equals("") && farmFile.equals("")) {
+			// otherwise they want to add to a specific farm
+			new AddStage(farmId, manager);
+		} else {
+			// otherwise alert the user to add a farm id or file name
+			Alert alert = new Alert(AlertType.WARNING, "Enter a file OR a farm.");
+			alert.setHeaderText("Must enter 1 Farm ID number or 1 file name.");
+			alert.showAndWait();
+		}
 	}
 	/**
 	 * @param args

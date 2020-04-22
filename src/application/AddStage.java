@@ -34,7 +34,7 @@ public class AddStage extends Stage {
 	private Label farmLabel;
 	private FarmManager manager;
 
-	AddStage(String farmID, FarmManager manager) {
+	public AddStage(String farmID, FarmManager manager) {
 		this.manager = manager;
 		farmLabel = new Label("Farm ID: " + farmID);
 
@@ -59,7 +59,7 @@ public class AddStage extends Stage {
 		// set up input for Milk date
 		VBox date = new VBox();
 		Label dateLabel = new Label("Date");
-		DatePicker datePicker = new DatePicker(); 
+		DatePicker datePicker = new DatePicker();
 		datePicker.setPromptText("yyyy-mm-dd");
 		datePicker.setConverter(convertDateFormat());
 		datePicker.requestFocus();
@@ -70,7 +70,7 @@ public class AddStage extends Stage {
 		Label blank = new Label("");
 		Button confirmAdd = new Button("Add Data");
 		buttonBox.getChildren().addAll(blank, confirmAdd);
-		
+
 		// set insert fields
 		insertFields.getChildren().addAll(date, weight, buttonBox);
 
@@ -78,10 +78,11 @@ public class AddStage extends Stage {
 		VBox insert = new VBox();
 		insert.getChildren().addAll(farmLabel, insertFields);
 		root.setTop(insert);
-		
+
 		// set the event handler for adding a new milk value
-		confirmAdd.setOnAction(e -> insertMilk(farmID, leadingZeros(datePicker.getValue()), milkWeight, vbox));
-	 
+		confirmAdd.setOnAction(e -> insertMilk(farmID,
+				leadingZeros(datePicker.getValue()), milkWeight, vbox));
+
 		// create the scene
 		this.setTitle("Farm ID: " + farmID);
 		farmLabel.setFont(Font.font(50));
@@ -89,17 +90,24 @@ public class AddStage extends Stage {
 		this.setScene(new Scene(root, 500, 400));
 		this.show();
 	}
-	
+
+	/**
+	 * This is a helper method to get the index of the farm in the arraylist
+	 * 
+	 * @param farmID - the String version of the FarmID
+	 * @return - the index of the farm in the arraylist or -1 if it is not there
+	 */
 	private int farmIndex(String farmID) {
-		for(int i = 0; i < manager.farms.size(); i++) {
-			if(manager.farms.get(i).farmID.equals(farmID)) {
+		for (int i = 0; i < manager.farms.size(); i++) {
+			if (manager.farms.get(i).farmID.equals(farmID)) {
 				return i;
 			}
 		}
 		return -1;
 	}
-	
-	private void insertMilk(String farmID, String milkDate, TextField milkWeight, VBox vbox) {
+
+	private void insertMilk(String farmID, String milkDate, TextField milkWeight,
+			VBox vbox) {
 		// add milk to the array list
 		int farmIndex = this.farmIndex(farmID);
 		String weight = milkWeight.getText();
@@ -107,11 +115,11 @@ public class AddStage extends Stage {
 		// add milk to the vbox
 		Farm farm = manager.farms.get(farmIndex);
 		Text milk = getMilk(farm);
-		
+
 		vbox.getChildren().add(milk);
-		
+
 	}
-	
+
 	private Text getMilk(Farm farm) {
 		Text milk;
 		String date = farm.getDate(farm.milk.size() - 1);
@@ -119,18 +127,18 @@ public class AddStage extends Stage {
 		milk = new Text(date + "; " + weight);
 		return milk;
 	}
-	
+
 	/**
 	 * This method prints all of the milk info contained within the specified
 	 * farms milk array
 	 * 
-	 * @param vbox - the vbox which will display all the values
+	 * @param vbox   - the vbox which will display all the values
 	 * @param farmID - the farmID to search for in the arraylist
 	 */
 	private void getInfo(VBox vbox, String farmID) {
 		Farm farm = null;
 		int farmIndex = this.farmIndex(farmID);
-		
+
 		if (farmIndex >= 0) {
 			farm = manager.farms.get(farmIndex);
 			for (int i = 0; i < farm.milk.size(); i++) {
@@ -140,72 +148,77 @@ public class AddStage extends Stage {
 			vbox.getChildren().addAll();
 		}
 	}
-	
+
 	/**
 	 * Converts the date to desired format
+	 * 
 	 * @return
 	 */
 	private StringConverter<LocalDate> convertDateFormat() {
 		// convert date format
 		StringConverter<LocalDate> converter = new StringConverter<LocalDate>() {
-			DateTimeFormatter dateFormatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-			DateTimeFormatter dateFormatter2 = DateTimeFormatter.ofPattern("yyyy-M-dd");
-			DateTimeFormatter dateFormatter3 = DateTimeFormatter.ofPattern("yyyy-MM-d");
-			DateTimeFormatter dateFormatter4 = DateTimeFormatter.ofPattern("yyyy-M-d");
+			DateTimeFormatter dateFormatter1 = DateTimeFormatter
+					.ofPattern("yyyy-MM-dd");
+			DateTimeFormatter dateFormatter2 = DateTimeFormatter
+					.ofPattern("yyyy-M-dd");
+			DateTimeFormatter dateFormatter3 = DateTimeFormatter
+					.ofPattern("yyyy-MM-d");
+			DateTimeFormatter dateFormatter4 = DateTimeFormatter
+					.ofPattern("yyyy-M-d");
+
 			@Override
-		      public String toString(LocalDate date) {
-		        if (date != null && date.getMonthValue() < 10 && date.getDayOfMonth() < 10) {
-		        	return dateFormatter4.format(date);
-		        }
-		        else if (date != null && date.getMonthValue() < 10) {
-			          return dateFormatter2.format(date);
-		        }
-		        else if (date != null && date.getDayOfMonth() < 10) {
-		        	return dateFormatter3.format(date);
-		        }
-		        else if (date != null && date.getMonthValue() > 9 && date.getDayOfMonth() > 9) {
-		        	return dateFormatter1.format(date);
-		        }
-		        else {
-		          return "";
-		        }
-		      }
+			public String toString(LocalDate date) {
+				if (date != null && date.getMonthValue() < 10
+						&& date.getDayOfMonth() < 10) {
+					return dateFormatter4.format(date);
+				} else if (date != null && date.getMonthValue() < 10) {
+					return dateFormatter2.format(date);
+				} else if (date != null && date.getDayOfMonth() < 10) {
+					return dateFormatter3.format(date);
+				} else if (date != null && date.getMonthValue() > 9
+						&& date.getDayOfMonth() > 9) {
+					return dateFormatter1.format(date);
+				} else {
+					return "";
+				}
+			}
+
 			@Override
 			public LocalDate fromString(String string) {
 				if (string != null && !string.isEmpty()) {
-			          return LocalDate.parse(string, dateFormatter1);
-				} 
-				else {
+					return LocalDate.parse(string, dateFormatter1);
+				} else {
 					return null;
 				}
 			}
 		};
 		return converter;
 	}
+
 	/**
 	 * Removes leading zeros from date values before adding data
+	 * 
 	 * @param date
 	 * @return string of date without leading zeros
 	 */
 	private String leadingZeros(LocalDate date) {
-		DateTimeFormatter dateFormatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		DateTimeFormatter dateFormatter1 = DateTimeFormatter
+				.ofPattern("yyyy-MM-dd");
 		DateTimeFormatter dateFormatter2 = DateTimeFormatter.ofPattern("yyyy-M-dd");
 		DateTimeFormatter dateFormatter3 = DateTimeFormatter.ofPattern("yyyy-MM-d");
 		DateTimeFormatter dateFormatter4 = DateTimeFormatter.ofPattern("yyyy-M-d");
-		if (date != null && date.getMonthValue() < 10 && date.getDayOfMonth() < 10) {
-        	return dateFormatter4.format(date);
-        }
-        else if (date != null && date.getMonthValue() < 10) {
-	          return dateFormatter2.format(date);
-        }
-        else if (date != null && date.getDayOfMonth() < 10) {
-        	return dateFormatter3.format(date);
-        }
-        else if (date != null && date.getMonthValue() > 9 && date.getDayOfMonth() > 9) {
-        	return dateFormatter1.format(date);
-        }
-        else {
-          return "";
-        }
+		if (date != null && date.getMonthValue() < 10
+				&& date.getDayOfMonth() < 10) {
+			return dateFormatter4.format(date);
+		} else if (date != null && date.getMonthValue() < 10) {
+			return dateFormatter2.format(date);
+		} else if (date != null && date.getDayOfMonth() < 10) {
+			return dateFormatter3.format(date);
+		} else if (date != null && date.getMonthValue() > 9
+				&& date.getDayOfMonth() > 9) {
+			return dateFormatter1.format(date);
+		} else {
+			return "";
+		}
 	}
 }

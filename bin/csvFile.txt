@@ -1,0 +1,3 @@
+date,farm_id,weight
+2019-1-1,Farm 0,12
+2019-1-1,Farm 1,111
