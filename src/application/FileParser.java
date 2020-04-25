@@ -45,9 +45,13 @@ public class FileParser {
 						Farm newFarm = new Farm(farmId);
 						newFarm.addMilk(input[2], input[0]);
 						manager.farms.add(newFarm);
+						int month = Integer.parseInt(input[0].split("-")[1]);
+						manager.totalWeight[month - 1] += (int)Integer.parseInt(input[2]);
 					} else {
 						// else farm exists so add new milk data to it
 						manager.farms.get(farmIndex).addMilk(input[2], input[0]);
+						int month = Integer.parseInt(input[0].split("-")[1]);
+						manager.totalWeight[month - 1] += (int)Integer.parseInt(input[2]);
 					}
 				}
 			} else {

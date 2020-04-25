@@ -78,7 +78,8 @@ public class AddStage extends Stage {
 		VBox insert = new VBox();
 		insert.getChildren().addAll(farmLabel, insertFields);
 		root.setTop(insert);
-
+		
+		
 		// set the event handler for adding a new milk value
 		confirmAdd.setOnAction(e -> insertMilk(farmID,
 				leadingZeros(datePicker.getValue()), milkWeight, vbox));

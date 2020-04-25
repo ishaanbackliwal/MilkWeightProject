@@ -70,6 +70,7 @@ public class Farm {
 	 */
 	public void addMilk(String weight, String date) {
 		milk.add(new Milk(weight, date));
+		
 	}
 	/**
 	 * Removes milk with desired weight and date from the milk array list
@@ -105,6 +106,22 @@ public class Farm {
 	public int getWeight(int index) {
 		return milk.get(index).getWeight();
 	}
+	/**
+	 * Getter method for the year of milk
+	 * @return
+	 */
+	public int getYear(int index) {
+		return milk.get(index).getYear();
+	}
+	
+	/**
+	 * Getter method for the month of milk
+	 * @return
+	 */
+	public int getMonth(int index) {
+		return milk.get(index).getMonth();
+	}
+	
 	
 	
 }
