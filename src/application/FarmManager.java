@@ -27,4 +27,7 @@ public class FarmManager {
 		farms = new ArrayList<Farm>();
 		totalWeight = new int[12];
 	}
+	public int size() {
+		return farms.size();
+	}
 }
