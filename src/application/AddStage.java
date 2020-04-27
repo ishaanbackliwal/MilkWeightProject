@@ -14,12 +14,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.*;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -78,12 +80,11 @@ public class AddStage extends Stage {
 		VBox insert = new VBox();
 		insert.getChildren().addAll(farmLabel, insertFields);
 		root.setTop(insert);
-		
-		
+
 		// set the event handler for adding a new milk value
 		confirmAdd.setOnAction(e -> insertMilk(farmID,
 				leadingZeros(datePicker.getValue()), milkWeight, vbox));
-
+		
 		// create the scene
 		this.setTitle("Farm ID: " + farmID);
 		farmLabel.setFont(Font.font(50));
@@ -111,12 +112,29 @@ public class AddStage extends Stage {
 			VBox vbox) {
 		// add milk to the array list
 		int farmIndex = this.farmIndex(farmID);
+		Text milk;
 		String weight = milkWeight.getText();
-		manager.farms.get(farmIndex).addMilk(weight, milkDate);
-		// add milk to the vbox
-		Farm farm = manager.farms.get(farmIndex);
-		Text milk = getMilk(farm);
-
+		int month = Integer.parseInt(milkDate.split("-")[1]);
+		manager.totalWeight[month - 1] += (int)Integer.parseInt(weight);
+		if(weight.equals("") || milkDate.equals("")) {
+			Alert alert = new Alert(AlertType.WARNING, "Enter a milk weight or date.");
+			alert.setHeaderText("Must enter a valid integer milk weight or valid date.");
+			alert.showAndWait();
+			return;
+		}
+		
+		if (farmIndex == -1) {
+			// if farm does not exist must create a new one
+			Farm farm = new Farm(farmID);
+			farm.addMilk(weight, milkDate);
+			milk = getMilk(farm);
+			manager.farms.add(farm);
+		} else {
+			manager.farms.get(farmIndex).addMilk(weight, milkDate);
+			// add milk to the vbox
+			Farm farm = manager.farms.get(farmIndex);
+			milk = getMilk(farm);
+		}
 		vbox.getChildren().add(milk);
 
 	}
