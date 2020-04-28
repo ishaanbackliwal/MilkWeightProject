@@ -19,6 +19,8 @@ package application;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -55,10 +57,12 @@ public class OutputStage extends Stage {
 	private FarmManager manager;
 	private boolean inProgress = false;
 	VBox extraInput = new VBox(10);
-	int outputNum;
+	int farmReportNum = 0;
+	int annualReportNum = 0;
+	int monthlyReportNum = 0;
+	int dateRangeReportNum = 0;
 
 	OutputStage(FarmManager manager) {
-		outputNum = 0;
 		this.manager = manager;
 
 		// selection drop down and button
@@ -89,30 +93,29 @@ public class OutputStage extends Stage {
 							"Must select an option from the drop down.");
 					alert.setHeaderText("ERROR WARNING");
 					alert.showAndWait();
-				} else if (comboBox.getValue()
-						.compareTo("STAT DISPLAY: Farm Report") == 0) {
-					farmReportStatDisplay(1);
-				} else if (comboBox.getValue()
-						.compareTo("STAT DISPLAY: Annual Report") == 0) {
-					// TODO
-				} else if (comboBox.getValue()
-						.compareTo("STAT DISPLAY: Monthly Report") == 0) {
-					// monthly report stat display
-				} else if (comboBox.getValue()
-						.compareTo("STAT DISPLAY: Date Range Report") == 0) {
-					// date range report stat display
-				} else if (comboBox.getValue()
-						.compareTo("FILE OUTPUT: Farm Report") == 0) {
+				} else if (comboBox.getValue().compareTo("STAT DISPLAY: Farm Report") == 0) {
+					// farm report statistics display
+					farmReportStatDisplay();
+				} else if (comboBox.getValue().compareTo("STAT DISPLAY: Annual Report") == 0) {
+					// annual report statistics display
+					annualReportStatDisplay();
+				} else if (comboBox.getValue().compareTo("STAT DISPLAY: Monthly Report") == 0) {
+					// monthly report statistics display
+					monthlyReportStatDisplay();
+				} else if (comboBox.getValue().compareTo("STAT DISPLAY: Date Range Report") == 0) {
+					// date range report statistics display
+					dateRangeReportStatDisplay();
+				} else if (comboBox.getValue().compareTo("FILE OUTPUT: Farm Report") == 0) {
 					farmReportFileOutput();
-				} else if (comboBox.getValue()
-						.compareTo("FILE OUTPUT: Annual Report") == 0) {
+				} else if (comboBox.getValue().compareTo("FILE OUTPUT: Annual Report") == 0) {
 					// annual report file output
-				} else if (comboBox.getValue()
-						.compareTo("FILE OUTPUT: Monthly Report") == 0) {
+					annualReportFileOutput();
+				} else if (comboBox.getValue().compareTo("FILE OUTPUT: Monthly Report") == 0) {
 					// monthly report file output
-				} else if (comboBox.getValue()
-						.compareTo("FILE OUTPUT: Date Range Report") == 0) {
+					monthlyReportFileOutput();
+				} else if (comboBox.getValue().compareTo("FILE OUTPUT: Date Range Report") == 0) {
 					// date range report file output
+					dateRangeReportFileOutput();
 				}
 			}
 		};
@@ -127,11 +130,13 @@ public class OutputStage extends Stage {
 		this.show();
 	}
 
+////////////////////////////////////////////////////////////////////////////////
+///																		   	 ///
+///  							FARM REPORT									 ///
+///																		   	 ///
+////////////////////////////////////////////////////////////////////////////////
 	/**
-	 * Private method to help output the file report 1 - farm report 2 - yearly
-	 * report 3 - Monthly report 4 - Date range report
-	 * 
-	 * @param outputFormat - the type of report desired
+	 * FILE OUTPUT
 	 */
 	private void farmReportFileOutput() {
 		if (inProgress == true) {
@@ -169,13 +174,12 @@ public class OutputStage extends Stage {
 					alert.setHeaderText("ERROR WARNING");
 					alert.showAndWait();
 				}
-
 				// year is empty
 				if (yearTextField.getText().compareTo("") == 0) {
 					String farmId = farmIDTextField.getText();
 					// requesting all data
 					try {
-						new FarmReport(farmId, -1, "file", 1);
+						new Reports(farmId, -1, "file", 1);
 					} catch (Exception e1) {}
 
 					// year input is not a valid integer
@@ -189,7 +193,7 @@ public class OutputStage extends Stage {
 					String farmId = farmIDTextField.getText();
 					int year = Integer.parseInt(yearTextField.getText());
 					try {
-						new FarmReport(farmId, year, "file", 1);
+						new Reports(farmId, year, "file", 1);
 					} catch (Exception e2) {}
 				}
 			}
@@ -197,7 +201,10 @@ public class OutputStage extends Stage {
 		doneButton.setOnAction(event2);
 	}
 
-	private void farmReportStatDisplay(int reportType) {
+	/**
+	 * STAT DISPLAY
+	 */
+	private void farmReportStatDisplay() {
 		if (inProgress == true) {
 			return;
 		}
@@ -226,64 +233,209 @@ public class OutputStage extends Stage {
 
 		EventHandler<ActionEvent> event2 = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
-				if (!validateInfo(farmIDTextField, yearTextField)) {
+				if (!validateInfo(farmIDTextField, yearTextField, true)) {
 					return;
 				}
-				// 1 = farmReport
-				if (reportType == 1) {
-					// all data requested
-					if (yearTextField.getText().compareTo("") == 0) {
-						String farmId = farmIDTextField.getText();
-						// send a year of -1 if all data requested
-						try {
-							new FarmReport(farmId, -1, "stats", 1);
-						} catch (Exception e1) {}
-						// year is not a valid integer
-					} else {
-						String farmId = farmIDTextField.getText();
-						int year = Integer.parseInt(yearTextField.getText());
-						try {
-							new FarmReport(farmId, year, "stats", 1);
-						} catch (Exception e1) {}
-					}
-				} else if (reportType == 2) {
-
-				} else if (reportType == 3) {
-
-				} else if (reportType == 4) {
-
+				// all data requested
+				if (yearTextField.getText().compareTo("") == 0) {
+					String farmId = farmIDTextField.getText();
+					// send a year of -1 if all data requested
+					try {
+						new Reports(farmId, -1, "stats", 1);
+					} catch (Exception e1) {}
+					// year is not a valid integer
+				} else {
+					String farmId = farmIDTextField.getText();
+					int year = Integer.parseInt(yearTextField.getText());
+					try {
+						new Reports(farmId, year, "stats", 1);
+					} catch (Exception e1) {}
 				}
 
 			}
 		};
 		doneButton.setOnAction(event2);
 	}
+////////////////////////////////////////////////////////////////////////////////
+///																		   	 ///
+///  							ANNUAL REPORT								 ///
+///																		   	 ///
+////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * FILE OUTPUT
+	 */
+	private void annualReportFileOutput() {
+		if (inProgress == true) {
+			return;
+		}
+		this.inProgress = true;
+		HBox hbox = new HBox();
+		Button doneButton = new Button("Done!");
 
+		// text field
+		TextField yearTextField = new TextField();
+
+		// text field vbox
+		VBox yearBox = new VBox();
+		Label yearLabel = new Label("Year:");
+		yearBox.getChildren().addAll(yearLabel, yearTextField);
+
+		// more box setup
+		hbox.getChildren().addAll(yearBox);
+		hbox.setAlignment(Pos.CENTER);
+		extraInput.getChildren().addAll(hbox, doneButton);
+		extraInput.setAlignment(Pos.CENTER);
+		root.setCenter(extraInput);
+		
+		EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				if(yearTextField.getText().compareTo("") == 0) {
+					Alert alert = new Alert(AlertType.WARNING,
+							"Must enter a valid integer year");
+					alert.setHeaderText("ERROR: Year field was left blank");
+					alert.showAndWait();
+				}
+				else if(validateInfo(null, yearTextField, false)) {
+					int year = Integer.parseInt(yearTextField.getText());
+					try {
+						new Reports(null, year, "file", 2);
+					} catch (Exception e1) {}
+				}
+				else {
+					Alert alert = new Alert(AlertType.WARNING,
+							"Must enter a valid integer year");
+					alert.setHeaderText("ERROR: Invalid year");
+					alert.showAndWait();
+				}
+			}
+		};
+		doneButton.setOnAction(event);
+	}
+	/**
+	 * STAT DISPLAY
+	 */
+	private void annualReportStatDisplay() {
+		if (inProgress == true) {
+			return;
+		}
+		this.inProgress = true;
+		HBox hbox = new HBox();
+		Button doneButton = new Button("Done!");
+
+		// text field
+		TextField yearTextField = new TextField();
+
+		// text field vbox
+		VBox yearBox = new VBox();
+		Label yearLabel = new Label("Year:");
+		yearBox.getChildren().addAll(yearLabel, yearTextField);
+
+		// more box setup
+		hbox.getChildren().addAll(yearBox);
+		hbox.setAlignment(Pos.CENTER);
+		extraInput.getChildren().addAll(hbox, doneButton);
+		extraInput.setAlignment(Pos.CENTER);
+		root.setCenter(extraInput);
+		
+		EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+			public void handle(ActionEvent e) {
+				if(yearTextField.getText().compareTo("") == 0) {
+					Alert alert = new Alert(AlertType.WARNING,
+							"Must enter a valid integer year");
+					alert.setHeaderText("ERROR: Year field was left blank");
+					alert.showAndWait();
+				}
+				else if(validateInfo(null, yearTextField, false)) {
+					int year = Integer.parseInt(yearTextField.getText());
+					try {
+						new Reports(null, year, "stats", 2);
+					} catch (Exception e1) {}
+				}
+				else {
+					Alert alert = new Alert(AlertType.WARNING,
+							"Must enter a valid integer year");
+					alert.setHeaderText("ERROR: Invalid year");
+					alert.showAndWait();
+				}
+			}
+		};
+		doneButton.setOnAction(event);
+	}
+	
+
+	
+////////////////////////////////////////////////////////////////////////////////
+///																		   	 ///
+///  							MONTHLY REPORT								 ///
+///																		   	 ///
+////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * FILE OUTPUT
+	 */
+	private void monthlyReportFileOutput() {
+		
+	}
+	/**
+	 * STAT DISPLAY
+	 */
+	private void monthlyReportStatDisplay() {
+		
+	}
+
+
+////////////////////////////////////////////////////////////////////////////////
+///																		   	 ///
+///  						  DATE RANGE REPORT								 ///
+///																		   	 ///
+////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * FILE OUTPUT
+	 */
+	private void dateRangeReportFileOutput() {
+		
+	}
+	/**
+	 * STAT DISPLAY
+	 */
+	private void dateRangeReportStatDisplay() {
+		
+	}
+
+	
+////////////////////////////////////////////////////////////////////////////////
+///																		   	 ///
+///  							OTHER METHODS								 ///
+///																		   	 ///
+////////////////////////////////////////////////////////////////////////////////
 	/**
 	 * This private helper method is used to validate the user input
 	 * 
 	 * @param farmIDTextField - the farm ID field user enters string into
 	 * @param yearTextField   - the year field the user enters year into
+	 * @param farmIDConditon - true if farm Id is needed, false otherwise
 	 * @return - false if any input is invalid, true otherwise
 	 */
 	private boolean validateInfo(TextField farmIDTextField,
-			TextField yearTextField) {
-		// farm id not entered
-		if (farmIDTextField.getText().compareTo("") == 0) {
-			Alert alert = new Alert(AlertType.WARNING, "Must enter a Farm ID");
-			alert.setHeaderText("ERROR WARNING");
-			alert.showAndWait();
-			return false;
-		} else if (farmIndex(farmIDTextField.getText()) == -1) {
-			Alert alert = new Alert(AlertType.WARNING, "Must enter a valid Farm ID");
-			alert.setHeaderText("ERROR WARNING");
-			alert.showAndWait();
-			return false;
+			TextField yearTextField, boolean farmIDCondition) {
+		// if farm Id is needed
+		if(farmIDCondition) {
+			// farm id not entered
+			if (farmIDTextField.getText().compareTo("") == 0) {
+				Alert alert = new Alert(AlertType.WARNING, "Must enter a Farm ID");
+				alert.setHeaderText("ERROR WARNING");
+				alert.showAndWait();
+				return false;
+			} else if (farmIndex(farmIDTextField.getText()) == -1) {
+				Alert alert = new Alert(AlertType.WARNING, "Must enter a valid Farm ID");
+				alert.setHeaderText("ERROR WARNING");
+				alert.showAndWait();
+				return false;
+			}
 		}
 		if (!isInt(yearTextField.getText())
 				&& !yearTextField.getText().equals("")) {
 			Alert alert = new Alert(AlertType.WARNING,
-					"Must enter a valid integer year or leave blank for all data");
+					"Must enter a valid integer year");
 			alert.setHeaderText("ERROR WARNING");
 			alert.showAndWait();
 			return false;
@@ -305,33 +457,57 @@ public class OutputStage extends Stage {
 		}
 		return -1;
 	}
-
-	class FarmReport extends Stage {
+////////////////////////////////////////////////////////////////////////////////
+///																		   	 ///
+///  							REPORTS CLASS								 ///
+///																		   	 ///
+////////////////////////////////////////////////////////////////////////////////
+	class Reports extends Stage {
 		private BorderPane root = new BorderPane();
 		private Label farmLabel;
 		private int[] milkWeight;
 
-		public FarmReport(String farmId, int year, String option, int type) throws Exception {
+		/**
+		 * CONSTRUCTOR
+		 * 
+		 * @param type
+		 * 		- 1 = farm report
+		 * 		- 2 = annual report
+		 * 		- 3 = monthly report
+		 * 		- 4 = date range report
+		 */
+		public Reports(String farmId, int year, String option, int type) throws Exception {
 			if (option.compareTo("stats") == 0)
 				statDisplay(farmId, year, type);
 			else if (option.compareTo("file") == 0)
 				fileOutput(farmId, year, type);
 		}
-
+		
+		/**
+		 * FILE OUTPUT
+		 * 
+		 * @param type
+		 * 		- 1 = farm report
+		 * 		- 2 = annual report
+		 * 		- 3 = monthly report
+		 * 		- 4 = date range report
+		 */
 		public void fileOutput(String farmId, int year, int type) throws Exception {
-			try {
-				sumWeights(farmId);
-			}
-			catch(Exception e) {
-				Alert alert = new Alert(AlertType.WARNING, "Please enter a valid farm ID to output data.");
-				alert.setHeaderText("Farm ID does not exist.");
-				alert.showAndWait();
-				return;
-			}
-			// farm report
+			
+			// FARM REPORT
 			if (type == 1) {
+				// see if farm ID exists
+				try {
+					sumWeights(farmId);
+				}
+				catch(Exception e) {
+					Alert alert = new Alert(AlertType.WARNING, "Please enter a valid farm ID to output data.");
+					alert.setHeaderText("Farm ID does not exist.");
+					alert.showAndWait();
+					return;
+				}
 				File csvFile = new File(
-						"Milk_weight_farm_report-" + outputNum + ".csv");
+						"Milk_weight_farm_report-" + farmReportNum + ".csv");
 				FileWriter writer;
 				try {
 					writer = new FileWriter(csvFile);
@@ -358,11 +534,11 @@ public class OutputStage extends Stage {
 					if (writer != null) {
 						Alert alert = new Alert(AlertType.INFORMATION,
 								"New file, " + csvFile + " has been created.");
-						alert.setHeaderText("Confirmed stats file was created");
+						alert.setHeaderText("Confirmed data file was created");
 						alert.showAndWait();
 					}
 					writer.close();
-					outputNum++;
+					farmReportNum++;
 				} catch (IOException e) {
 					if (csvFile.delete()) {
 						Alert alert = new Alert(AlertType.INFORMATION,
@@ -374,32 +550,95 @@ public class OutputStage extends Stage {
 				}
 
 			}
-		}
+			
+			// ANNUAL REPORT
+			if(type == 2) {
+				File csvFile = new File(
+						"Milk_weight_annual_report-" + annualReportNum + ".csv");
+				FileWriter writer;
+				ArrayList<String> farms = findFarms(year);
+				
+				// find total weight
+				int totalWeight = 0;
+				for(int i = 0; i < manager.farms.size(); i++) {
+					for(int m = 0; m < manager.farms.get(i).size(); m++) {
+						totalWeight += manager.farms.get(i).getWeight(m);
+					}
+				}
+				double percent = 0;
+				try {
+					writer = new FileWriter(csvFile);
 
+					writer.write("Year: " + year + "\n");
+					writer.write("FarmID,Farm Total Weight,Percent of Total Milk\n");
+					for(int i = 0; i < farms.size(); i++) {
+						int farmWeight = sumOfFarmWeightsByYear(farms.get(i), year);
+						if(farmWeight != 0) {
+							percent = Math.round(((double)farmWeight / (double)totalWeight) * 100.0);
+						}
+						else {
+							percent = 0;
+						}
+						writer.write(farms.get(i) + "," + farmWeight + "," + percent + "\n");
+					}
+					if (writer != null) {
+						Alert alert = new Alert(AlertType.INFORMATION,
+								"New file, " + csvFile + " has been created.");
+						alert.setHeaderText("Confirmed data file was created");
+						alert.showAndWait();
+					}
+					writer.close();
+					annualReportNum++;
+				} catch (IOException e) {
+					if (csvFile.delete()) {
+						Alert alert = new Alert(AlertType.INFORMATION,
+								"File did not complete building.");
+						alert.setHeaderText("There was an error in the file creation.");
+						alert.showAndWait();
+					}
+				}
+			}
+			
+			// MONTHLY REPORT
+			if(type == 3) {
+				
+			}
+			
+			// DATE RNAGE REPORT
+			if(type == 4) {
+				
+			}
+		}
+		/**
+		 * STATE DISPLAY
+		 * 
+		 * @param type
+		 * 		- 1 = farm report
+		 * 		- 2 = annual report
+		 * 		- 3 = monthly report
+		 * 		- 4 = date range report
+		 */
 		public void statDisplay(String farmId, int year, int type) throws Exception {
-			try {
-				sumWeights(farmId);
-			}
-			catch(Exception e) {
-				Alert alert = new Alert(AlertType.WARNING, "Please enter a valid farm ID to output data.");
-				alert.setHeaderText("Farm ID does not exist.");
-				alert.showAndWait();
-				return;
-			}
-			farmLabel = new Label("Farm ID: " + farmId);
 			// set up a vbox to display all values
 			VBox vbox = new VBox();
 			root = new BorderPane(vbox);
 			root.setPadding(new Insets(15));
-			root.setTop(farmLabel);
 
 			// farm report
 			if (type == 1) {
+				farmLabel = new Label("Farm ID: " + farmId);
+				root.setTop(farmLabel);
+				// see if farm ID exists
+				try {
+					sumWeights(farmId);
+				} catch(Exception e) {
+					Alert alert = new Alert(AlertType.WARNING, "Please enter a valid farm ID to output data.");
+					alert.setHeaderText("Farm ID does not exist.");
+					alert.showAndWait();
+					return;
+				}
 				// get the statistics
 				Text info;
-				// info = new Text("Company total milk weight: " + manager.totalWeight);
-				// vbox.getChildren().add(info);
-				/* Find Total Milk weight : percentage of Total each month */
 				// determine is specific year or all data was requested
 				if (year == -1) {
 					milkWeight = sumWeights(farmId);
@@ -414,6 +653,7 @@ public class OutputStage extends Stage {
 					vbox.getChildren().add(info);
 				}
 				double percent = 0;
+				
 				for (int i = 1; i <= 12; i++) {
 					if (manager.totalWeight[i - 1] != 0) {
 						percent = Math.round(100 * ((double) milkWeight[i - 1]
@@ -423,20 +663,103 @@ public class OutputStage extends Stage {
 					}
 					info = new Text("Month " + i + " Weight: " + milkWeight[i - 1]
 							+ " Percent of total milk across all farms for Month : "
-							+ percent);
+							+ percent + "%");
 
 					vbox.getChildren().add(info);
 				}
 			}
+			
+			// annual report
+			else if(type == 2) {
+				// scroll pane
+				ScrollPane scrollPane = new ScrollPane(vbox);
+				scrollPane.setFitToHeight(true);
+				root = new BorderPane(scrollPane);
+				root.setPadding(new Insets(15));
+				
+				// stage title
+				farmLabel = new Label("Data Report for " + year);
+				root.setTop(farmLabel);
+				
+				// get the statistics
+				Text info;
+				info = new Text("FarmID, Total Weight for Farm, Farms Percent of Milk Compared To All Farms\n");
+				vbox.getChildren().add(info);
+				ArrayList<String> farms = findFarms(year);
+				// finding total weight
+				int totalWeight = 0;
+				for(int i = 0; i < manager.farms.size(); i++) {
+					for(int m = 0; m < manager.farms.get(i).size(); m++) {
+						totalWeight += manager.farms.get(i).getWeight(m);
+					}
+				}
+				double percent = 0;
+				for(int i = 0; i < farms.size(); i++) {
+					int farmWeight = sumOfFarmWeightsByYear(farms.get(i), year);
+					if(farmWeight != 0) {
+						percent = Math.round(((double)farmWeight / (double)totalWeight) * 100.0);
+					}
+					else {
+						percent = 0;
+					}
+					info = new Text(farms.get(i) + ", " + farmWeight + ", " + percent + "%\n");
+					vbox.getChildren().add(info);
+				}
+			}
+			
+			// monthly report
+			else if(type == 3) {
+				
+			}
+			
+			// date range report
+			else if(type == 4) {
+				
+			}
 
 			// create the scene
 			this.setTitle("Farm ID: " + farmId);
-			farmLabel.setFont(Font.font(50));
+			farmLabel.setFont(Font.font(40));
 			BorderPane.setAlignment(farmLabel, Pos.CENTER);
 			this.setScene(new Scene(root, 500, 400));
 			this.show();
 		}
-
+		/**
+		 * Gets an array list of farm ID's that have a milk object with a certain year specification
+		 * @param year
+		 * @return ArrayList of strings
+		 */
+		private ArrayList<String> findFarms(int year) {
+			ArrayList<String> farmIDs = new ArrayList<String>();
+			for(int i = 0; i < manager.farms.size(); i++) {
+				for(int m = 0; m < manager.farms.get(i).size(); m++) {
+					int milkYear = manager.farms.get(i).getYear(m);
+					if(milkYear == year) {
+						if(!farmIDs.contains(manager.farms.get(i).farmID))
+							farmIDs.add(manager.farms.get(i).farmID);
+					}
+				}
+			}
+			Collections.sort(farmIDs);
+			return farmIDs;
+		}
+		private int sumOfFarmWeightsByYear(String farmId, int year) throws Exception {
+			int index = farmIndex(farmId);
+			int totalWeight = 0;
+			if(index == -1) {
+				throw new Exception();
+			} 
+			else {
+				Farm farm = manager.farms.get(index);
+				for (int i = 0; i < farm.milk.size(); i++) {
+					if (farm.getYear(i) == year) {
+						totalWeight += farm.getWeight(i);
+					}
+				}
+			}
+			return totalWeight;
+		}
+		
 		/**
 		 * this method is used to find the sum of all milk weights for a farm in a
 		 * given year.
@@ -504,8 +827,8 @@ public class OutputStage extends Stage {
 		return true;
 	}
 
-	private void annualReport() {
-
+	private void annualReport(int year) {
+		
 	}
 
 	private void monthylReport() {
@@ -516,3 +839,23 @@ public class OutputStage extends Stage {
 
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

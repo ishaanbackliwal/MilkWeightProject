@@ -76,7 +76,7 @@ public class DisplayStage extends Stage {
 			for(int j = 0; j < manager.farms.size(); j++) {
 				farm = manager.farms.get(j);
 				for (int i = 0; i < farm.milk.size(); i++) {
-					Text value = new Text(farm.getDate(i) + "; " + farm.getWeight(i));
+					Text value = new Text(farm.getDate(i) + "; " + farm.getWeight(i) + "; " + manager.farms.get(j).farmID);
 					vbox.getChildren().addAll(value);
 				}
 			}

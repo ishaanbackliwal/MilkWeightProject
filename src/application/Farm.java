@@ -73,7 +73,13 @@ public class Farm {
 		this.farmID = farmID;
 		milk = new ArrayList<Milk>();
 	}
-
+	/**
+	 * Gets number of milk objects in farm
+	 * @return
+	 */
+	public int size() {
+		return milk.size();
+	}
 	/**
 	 * Adds milk with desired weight and date to the milk array list
 	 * 
