@@ -1,6 +1,7 @@
 
 package application;
 
+import java.io.IOException;
 import java.util.List;
 
 import javafx.application.Application;
@@ -108,7 +109,13 @@ public class ManagerGUI extends Application {
 		root.setCenter(hboxTextFields);
 		
 		// Create new pop up windows taking text input
-		addButton.setOnAction(e -> fileOrFarm(farmIDTextField, fileNameTextField));
+		addButton.setOnAction(e -> {
+			try {
+				fileOrFarm(farmIDTextField, fileNameTextField);
+			} catch (NumberFormatException | IOException e1) {
+				e1.printStackTrace();
+			}
+		});
 		removeButton.setOnAction(e -> new RemoveStage(farmIDTextField.getText(), manager));
 		editButton.setOnAction(e -> new AddStage(farmIDTextField.getText(), manager));
 		displayButton.setOnAction(e -> new DisplayStage(farmIDTextField.getText(), manager));
@@ -122,7 +129,7 @@ public class ManagerGUI extends Application {
 		primaryStage.setScene(mainScene);
 		primaryStage.show();
 	}
-	private void fileOrFarm(TextField farmNum, TextField newFile) {
+	private void fileOrFarm(TextField farmNum, TextField newFile) throws NumberFormatException, IOException {
 		// get the text from both fields
 		String farmId = farmNum.getText();
 		String farmFile = newFile.getText();
