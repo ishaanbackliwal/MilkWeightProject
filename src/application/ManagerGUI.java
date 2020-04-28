@@ -53,7 +53,6 @@ public class ManagerGUI extends Application {
 		// Buttons
 		Button addButton = new Button("ADD");
 		Button removeButton = new Button("REMOVE");
-		Button editButton = new Button("EDIT");
 		Button displayButton = new Button("DISPLAY");
 		Button outputButton = new Button("OUTPUT");
 
@@ -78,7 +77,7 @@ public class ManagerGUI extends Application {
 
 		// Button vertical box
 		HBox hboxButtons = new HBox(10);
-		hboxButtons.getChildren().addAll(addButton, removeButton, editButton,
+		hboxButtons.getChildren().addAll(addButton, removeButton,
 				displayButton, outputButton);
 		hboxButtons.setAlignment(Pos.BOTTOM_CENTER);
 		root.setBottom(hboxButtons);
@@ -109,6 +108,8 @@ public class ManagerGUI extends Application {
 		root.setCenter(hboxTextFields);
 		
 		// Create new pop up windows taking text input
+		// Checks for bad input on button press
+		// add button
 		addButton.setOnAction(e -> {
 			try {
 				fileOrFarm(farmIDTextField, fileNameTextField);
@@ -116,19 +117,55 @@ public class ManagerGUI extends Application {
 				e1.printStackTrace();
 			}
 		});
+		// remove button
 		removeButton.setOnAction(e -> {
+			// farm id is left blank
 			if(farmIDTextField.getText().compareTo("") == 0) {
-				Alert alert = new Alert(AlertType.WARNING, "Enter a valid farm ID.");
-				alert.setHeaderText("Farm ID was left blank, please enter an ID.");
+				Alert alert = new Alert(AlertType.WARNING, "Please enter a valid farm ID to remove data.");
+				alert.setHeaderText("ERROR: Farm ID was left blank.");
 				alert.showAndWait();
-			}	
+			}
+			// farm id does not exist among inputted data
+			else if(!manager.containsFarm(farmIDTextField.getText())) {
+				Alert alert = new Alert(AlertType.WARNING, "Please enter a valid farm ID to remove data.");
+				alert.setHeaderText("ERROR: Farm ID does not exist.");
+				alert.showAndWait();
+			}
+			// open farm id to remove data
 			else {
 				new RemoveStage(farmIDTextField.getText(), manager);
 			}
+		});	
+		// display button
+		displayButton.setOnAction(e -> {
+			// farm id was left blank
+			if(farmIDTextField.getText().compareTo("") == 0) {
+				new DisplayStage("all", manager);
+			}
+			// farm id entered does not exist
+			else if(!manager.containsFarm(farmIDTextField.getText())) {
+				Alert alert = new Alert(AlertType.WARNING, "Please enter a valid farm ID to display data.\n (or leave field blank to display all data)");
+				alert.setHeaderText("ERROR: Farm ID does not exist.");
+				alert.showAndWait();
+			}
+			// open farm id to display data
+			else {
+				new DisplayStage(farmIDTextField.getText(), manager);
+			}
 		});
-		editButton.setOnAction(e -> new AddStage(farmIDTextField.getText(), manager));
-		displayButton.setOnAction(e -> new DisplayStage(farmIDTextField.getText(), manager));
-		outputButton.setOnAction(e -> new OutputStage(manager));
+		// output button
+		outputButton.setOnAction(e -> {
+			// no data exists to output
+			if(manager.farms.size() == 0) {
+				Alert alert = new Alert(AlertType.WARNING, "Please enter input data to output information.");
+				alert.setHeaderText("ERROR: No data has been provided.");
+				alert.showAndWait();
+			}	
+			// open output stage and prompt user for input
+			else {
+				new OutputStage(manager);
+			}
+		});
 		
 		// Create the main scene
 		Scene mainScene = new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);

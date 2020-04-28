@@ -30,4 +30,11 @@ public class FarmManager {
 	public int size() {
 		return farms.size();
 	}
+	public boolean containsFarm(String farmId) {
+		for(int i = 0; i < farms.size(); i ++) {
+			if(farms.get(i).farmID.compareTo(farmId) == 0)
+				return true;
+		}
+		return false;
+	}
 }

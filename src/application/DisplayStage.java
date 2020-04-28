@@ -20,9 +20,16 @@ public class DisplayStage extends Stage {
 	private Label farmLabel;
 	private FarmManager manager;
 	
-	public DisplayStage(String farmID, FarmManager manager) {
+	public DisplayStage(String farmId, FarmManager manager) {
 		this.manager = manager;
-		farmLabel = new Label("Farm ID: " + farmID);
+		
+		// if all data requested
+		if(farmId.compareTo("all") == 0)
+			farmLabel = new Label("All Data");
+		// specific farm id requested
+		else
+			farmLabel = new Label("Farm ID: " + farmId);
+		
 		// set up a vbox to display all values
 		VBox vbox = new VBox();
 		ScrollPane scrollPane = new ScrollPane(vbox);
@@ -31,11 +38,11 @@ public class DisplayStage extends Stage {
 		root.setPadding(new Insets(15));
 
 		// retrieve all the values stored in the farm location
-		getInfo(vbox, farmID);
+		getInfo(vbox, farmId);
 		
 		root.setTop(farmLabel);
 		// create the scene
-			this.setTitle("Farm ID: " + farmID);
+			this.setTitle("Farm ID: " + farmId);
 			farmLabel.setFont(Font.font(50));
 			BorderPane.setAlignment(farmLabel, Pos.CENTER);
 			this.setScene(new Scene(root, 500, 400));
@@ -48,9 +55,9 @@ public class DisplayStage extends Stage {
 	 * @param farmID - the String version of the FarmID
 	 * @return - the index of the farm in the arraylist or -1 if it is not there
 	 */
-	private int farmIndex(String farmID) {
+	private int farmIndex(String farmId) {
 		for (int i = 0; i < manager.farms.size(); i++) {
-			if (manager.farms.get(i).farmID.equals(farmID)) {
+			if (manager.farms.get(i).farmID.compareTo(farmId) == 0) {
 				return i;
 			}
 		}
@@ -63,17 +70,26 @@ public class DisplayStage extends Stage {
 	 * @param vbox   - the vbox which will display all the values
 	 * @param farmID - the farmID to search for in the arraylist
 	 */
-	private void getInfo(VBox vbox, String farmID) {
+	private void getInfo(VBox vbox, String farmId) {
 		Farm farm = null;
-		int farmIndex = this.farmIndex(farmID);
-
-		if (farmIndex >= 0) {
-			farm = manager.farms.get(farmIndex);
-			for (int i = 0; i < farm.milk.size(); i++) {
-				Text value = new Text(farm.getDate(i) + "; " + farm.getWeight(i));
-				vbox.getChildren().addAll(value);
+		if(farmId.compareTo("all") == 0) {
+			for(int j = 0; j < manager.farms.size(); j++) {
+				farm = manager.farms.get(j);
+				for (int i = 0; i < farm.milk.size(); i++) {
+					Text value = new Text(farm.getDate(i) + "; " + farm.getWeight(i));
+					vbox.getChildren().addAll(value);
+				}
 			}
-			vbox.getChildren().addAll();
+		}
+		else {
+			int farmIndex = this.farmIndex(farmId);
+			if (farmIndex >= 0) {
+				farm = manager.farms.get(farmIndex);
+				for (int i = 0; i < farm.milk.size(); i++) {
+					Text value = new Text(farm.getDate(i) + "; " + farm.getWeight(i));
+					vbox.getChildren().addAll(value);
+				}
+			}	
 		}
 	}
 

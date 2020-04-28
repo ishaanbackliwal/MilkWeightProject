@@ -174,7 +174,9 @@ public class OutputStage extends Stage {
 				if (yearTextField.getText().compareTo("") == 0) {
 					String farmId = farmIDTextField.getText();
 					// requesting all data
-					new FarmReport(farmId, -1, "file", 1);
+					try {
+						new FarmReport(farmId, -1, "file", 1);
+					} catch (Exception e1) {}
 
 					// year input is not a valid integer
 				} else if (!isInt(yearTextField.getText())) {
@@ -186,7 +188,9 @@ public class OutputStage extends Stage {
 				} else {
 					String farmId = farmIDTextField.getText();
 					int year = Integer.parseInt(yearTextField.getText());
-					new FarmReport(farmId, year, "file", 1);
+					try {
+						new FarmReport(farmId, year, "file", 1);
+					} catch (Exception e2) {}
 				}
 			}
 		};
@@ -231,12 +235,16 @@ public class OutputStage extends Stage {
 					if (yearTextField.getText().compareTo("") == 0) {
 						String farmId = farmIDTextField.getText();
 						// send a year of -1 if all data requested
-						new FarmReport(farmId, -1, "stats", 1);
+						try {
+							new FarmReport(farmId, -1, "stats", 1);
+						} catch (Exception e1) {}
 						// year is not a valid integer
 					} else {
 						String farmId = farmIDTextField.getText();
 						int year = Integer.parseInt(yearTextField.getText());
-						new FarmReport(farmId, year, "stats", 1);
+						try {
+							new FarmReport(farmId, year, "stats", 1);
+						} catch (Exception e1) {}
 					}
 				} else if (reportType == 2) {
 
@@ -291,7 +299,7 @@ public class OutputStage extends Stage {
 	 */
 	private int farmIndex(String farmID) {
 		for (int i = 0; i < manager.farms.size(); i++) {
-			if (manager.farms.get(i).farmID.equals(farmID)) {
+			if (manager.farms.get(i).farmID.compareTo(farmID) == 0) {
 				return i;
 			}
 		}
@@ -303,14 +311,23 @@ public class OutputStage extends Stage {
 		private Label farmLabel;
 		private int[] milkWeight;
 
-		public FarmReport(String farmId, int year, String option, int type) {
+		public FarmReport(String farmId, int year, String option, int type) throws Exception {
 			if (option.compareTo("stats") == 0)
 				statDisplay(farmId, year, type);
 			else if (option.compareTo("file") == 0)
 				fileOutput(farmId, year, type);
 		}
 
-		public void fileOutput(String farmId, int year, int type) {
+		public void fileOutput(String farmId, int year, int type) throws Exception {
+			try {
+				sumWeights(farmId);
+			}
+			catch(Exception e) {
+				Alert alert = new Alert(AlertType.WARNING, "Please enter a valid farm ID to output data.");
+				alert.setHeaderText("Farm ID does not exist.");
+				alert.showAndWait();
+				return;
+			}
 			// farm report
 			if (type == 1) {
 				File csvFile = new File(
@@ -359,7 +376,16 @@ public class OutputStage extends Stage {
 			}
 		}
 
-		public void statDisplay(String farmId, int year, int type) {
+		public void statDisplay(String farmId, int year, int type) throws Exception {
+			try {
+				sumWeights(farmId);
+			}
+			catch(Exception e) {
+				Alert alert = new Alert(AlertType.WARNING, "Please enter a valid farm ID to output data.");
+				alert.setHeaderText("Farm ID does not exist.");
+				alert.showAndWait();
+				return;
+			}
 			farmLabel = new Label("Farm ID: " + farmId);
 			// set up a vbox to display all values
 			VBox vbox = new VBox();
@@ -417,18 +443,23 @@ public class OutputStage extends Stage {
 		 * 
 		 * @param farmId - the farm to sum the weights
 		 * @return - the sum of weights in the farm
+		 * @throws Exception 
 		 */
-		private int[] sumWeights(String farmId, int year) {
+		private int[] sumWeights(String farmId, int year) throws Exception {
 			int[] averages = new int[12];
 			int index = farmIndex(farmId);
-			Farm farm = manager.farms.get(index);
-			for (int i = 0; i < farm.milk.size(); i++) {
-				if (farm.getYear(i) == year) {
-					int month = farm.getMonth(i) - 1;
-					averages[month] += farm.getWeight(i);
+			if(index == -1) {
+				throw new Exception();
+			} 
+			else {
+				Farm farm = manager.farms.get(index);
+				for (int i = 0; i < farm.milk.size(); i++) {
+					if (farm.getYear(i) == year) {
+						int month = farm.getMonth(i) - 1;
+						averages[month] += farm.getWeight(i);
+					}
 				}
 			}
-
 			return averages;
 		}
 
@@ -438,16 +469,21 @@ public class OutputStage extends Stage {
 		 * 
 		 * @param farmId - the farm to sum the weights
 		 * @return - the sum of weights in the farm
+		 * @throws Exception 
 		 */
-		private int[] sumWeights(String farmId) {
+		private int[] sumWeights(String farmId) throws Exception {
 			int[] averages = new int[12];
 			int index = farmIndex(farmId);
-			Farm farm = manager.farms.get(index);
-			for (int i = 0; i < farm.milk.size(); i++) {
-				int month = farm.getMonth(i) - 1;
-				averages[month] += farm.getWeight(i);
+			if(index == -1) {
+				throw new Exception();
 			}
-
+			else {
+				Farm farm = manager.farms.get(index);
+				for (int i = 0; i < farm.milk.size(); i++) {
+					int month = farm.getMonth(i) - 1;
+					averages[month] += farm.getWeight(i);
+				}
+			}
 			return averages;
 		}
 
