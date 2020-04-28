@@ -2,6 +2,7 @@ package application;
 
 import javafx.scene.Scene;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -82,9 +83,11 @@ public class AddStage extends Stage {
 		root.setTop(insert);
 
 		// set the event handler for adding a new milk value
-		confirmAdd.setOnAction(e -> insertMilk(farmID,
-				leadingZeros(datePicker.getValue()), milkWeight, vbox));
-		
+		confirmAdd.setOnAction(e -> {
+			insertMilk(farmID, leadingZeros(datePicker.getValue()), milkWeight, vbox);
+
+		});
+
 		// create the scene
 		this.setTitle("Farm ID: " + farmID);
 		farmLabel.setFont(Font.font(50));
@@ -114,15 +117,19 @@ public class AddStage extends Stage {
 		int farmIndex = this.farmIndex(farmID);
 		Text milk;
 		String weight = milkWeight.getText();
-		int month = Integer.parseInt(milkDate.split("-")[1]);
-		manager.totalWeight[month - 1] += (int)Integer.parseInt(weight);
-		if(weight.equals("") || milkDate.equals("")) {
-			Alert alert = new Alert(AlertType.WARNING, "Enter a milk weight or date.");
-			alert.setHeaderText("Must enter a valid integer milk weight or valid date.");
+		
+		if (weight.equals("") || milkDate.equals("")) {
+			Alert alert = new Alert(AlertType.WARNING,
+					"Enter a milk weight or date.");
+			alert.setHeaderText(
+					"Must enter a valid integer milk weight or valid date.");
 			alert.showAndWait();
 			return;
 		}
 		
+		int month = Integer.parseInt(milkDate.split("-")[1]);
+		manager.totalWeight[month - 1] += (int) Integer.parseInt(weight);
+
 		if (farmIndex == -1) {
 			// if farm does not exist must create a new one
 			Farm farm = new Farm(farmID);

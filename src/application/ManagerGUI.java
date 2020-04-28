@@ -130,12 +130,6 @@ public class ManagerGUI extends Application {
 		if(farmId.equals("") && !farmFile.equals("")) {
 			// if the user has entered a file, parse the file 
 			FileParser parser = new FileParser(farmFile, this.manager);
-			// if parser has no errors let the user know data was added
-			if(parser != null) {
-				Alert alert = new Alert(AlertType.INFORMATION, "All data has been added.");
-				alert.setHeaderText("Confirmed data was added");
-				alert.showAndWait();
-			}
 		} else if(!farmId.equals("") && farmFile.equals("")) {
 			// otherwise they want to add to a specific farm
 			new AddStage(farmId, manager);

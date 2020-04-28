@@ -16,6 +16,7 @@
  */
 package application;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -90,10 +91,10 @@ public class OutputStage extends Stage {
 					alert.showAndWait();
 				} else if (comboBox.getValue()
 						.compareTo("STAT DISPLAY: Farm Report") == 0) {
-					farmReportStatDisplay();
+					farmReportStatDisplay(1);
 				} else if (comboBox.getValue()
 						.compareTo("STAT DISPLAY: Annual Report") == 0) {
-					// annual report stat display
+					// TODO
 				} else if (comboBox.getValue()
 						.compareTo("STAT DISPLAY: Monthly Report") == 0) {
 					// monthly report stat display
@@ -126,6 +127,12 @@ public class OutputStage extends Stage {
 		this.show();
 	}
 
+	/**
+	 * Private method to help output the file report 1 - farm report 2 - yearly
+	 * report 3 - Monthly report 4 - Date range report
+	 * 
+	 * @param outputFormat - the type of report desired
+	 */
 	private void farmReportFileOutput() {
 		if (inProgress == true) {
 			return;
@@ -152,65 +159,41 @@ public class OutputStage extends Stage {
 		extraInput.getChildren().addAll(hbox, doneButton);
 		extraInput.setAlignment(Pos.CENTER);
 		root.setCenter(extraInput);
+
 		EventHandler<ActionEvent> event2 = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
+
 				// farm id input absent
 				if (farmIDTextField.getText().compareTo("") == 0) {
 					Alert alert = new Alert(AlertType.WARNING, "Must enter a Farm ID");
 					alert.setHeaderText("ERROR WARNING");
 					alert.showAndWait();
-					// farm id not a valid integer
-				} else if (!isInt(farmIDTextField.getText())) {
+				}
+
+				// year is empty
+				if (yearTextField.getText().compareTo("") == 0) {
+					String farmId = farmIDTextField.getText();
+					// requesting all data
+					new FarmReport(farmId, -1, "file", 1);
+
+					// year input is not a valid integer
+				} else if (!isInt(yearTextField.getText())) {
 					Alert alert = new Alert(AlertType.WARNING,
-							"Must enter a valid integer Farm ID");
+							"Must enter a valid integer year or leave blank for all data");
 					alert.setHeaderText("ERROR WARNING");
 					alert.showAndWait();
-					// all data requested
-				}
-				// farm id IS a valid integer
-				if (isInt(farmIDTextField.getText())) {
-					// test whether farm id exists
-					try {
-						// year is empty
-						if (yearTextField.getText().compareTo("") == 0) {
-							String farmId = farmIDTextField.getText();
-							try {
-								// requesting all data
-								new FarmReport(farmId, -1, "file", 1);
-							} catch (IOException e1) {
-								e1.printStackTrace();
-							}
-							// year input is not a valid integer
-						} else if (!isInt(yearTextField.getText())) {
-							Alert alert = new Alert(AlertType.WARNING,
-									"Must enter a valid integer year or leave blank for all data");
-							alert.setHeaderText("ERROR WARNING");
-							alert.showAndWait();
-							// specific year data requested
-						} else {
-							String farmId = farmIDTextField.getText();
-							int year = Integer.parseInt(yearTextField.getText());
-							try {
-								new FarmReport(farmId, year, "file", 1);
-							} catch (IOException e1) {
-								e1.printStackTrace();
-							}
-						}
-					}
-					// farm id does not exist
-					catch (Exception e1) {
-						Alert alert = new Alert(AlertType.WARNING,
-								"Must enter a valid integer Farm ID");
-						alert.setHeaderText("ERROR WARNING");
-						alert.showAndWait();
-					}
+					// specific year data requested
+				} else {
+					String farmId = farmIDTextField.getText();
+					int year = Integer.parseInt(yearTextField.getText());
+					new FarmReport(farmId, year, "file", 1);
 				}
 			}
 		};
 		doneButton.setOnAction(event2);
 	}
 
-	private void farmReportStatDisplay() {
+	private void farmReportStatDisplay(int reportType) {
 		if (inProgress == true) {
 			return;
 		}
@@ -239,52 +222,65 @@ public class OutputStage extends Stage {
 
 		EventHandler<ActionEvent> event2 = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent e) {
-				// farm id not entered
-				if (farmIDTextField.getText().compareTo("") == 0) {
-					Alert alert = new Alert(AlertType.WARNING, "Must enter a Farm ID");
-					alert.setHeaderText("ERROR WARNING");
-					alert.showAndWait();
-					// farm id is not a valid integer
-				} else if (!isInt(farmIDTextField.getText())) {
-					Alert alert = new Alert(AlertType.WARNING,
-							"Must enter a valid integer Farm ID");
-					alert.setHeaderText("ERROR WARNING");
-					alert.showAndWait();
+				if (!validateInfo(farmIDTextField, yearTextField)) {
+					return;
 				}
-				// farm id IS a valid integer
-				if (isInt(farmIDTextField.getText())) {
-					// test whether farm id exists
-					try {
-						manager.farms.get(farmIndex(farmIDTextField.getText()));
-						// all data requested
-						if (yearTextField.getText().compareTo("") == 0) {
-							String farmId = farmIDTextField.getText();
-							// send a year of -1 if all data requested
-							new FarmReport(farmId, -1, "stats", 1);
-							// year is not a valid integer
-						} else if (!isInt(yearTextField.getText())) {
-							Alert alert = new Alert(AlertType.WARNING,
-									"Must enter a valid integer year or leave blank for all data");
-							alert.setHeaderText("ERROR WARNING");
-							alert.showAndWait();
-							// specific year data requested
-						} else {
-							String farmId = farmIDTextField.getText();
-							int year = Integer.parseInt(yearTextField.getText());
-							new FarmReport(farmId, year, "stats", 1);
-						}
+				// 1 = farmReport
+				if (reportType == 1) {
+					// all data requested
+					if (yearTextField.getText().compareTo("") == 0) {
+						String farmId = farmIDTextField.getText();
+						// send a year of -1 if all data requested
+						new FarmReport(farmId, -1, "stats", 1);
+						// year is not a valid integer
+					} else {
+						String farmId = farmIDTextField.getText();
+						int year = Integer.parseInt(yearTextField.getText());
+						new FarmReport(farmId, year, "stats", 1);
 					}
-					// farm id does not exist
-					catch (Exception exception) {
-						Alert alert = new Alert(AlertType.WARNING,
-								"Must enter a valid integer Farm ID");
-						alert.setHeaderText("ERROR WARNING");
-						alert.showAndWait();
-					}
+				} else if (reportType == 2) {
+
+				} else if (reportType == 3) {
+
+				} else if (reportType == 4) {
+
 				}
+
 			}
 		};
 		doneButton.setOnAction(event2);
+	}
+
+	/**
+	 * This private helper method is used to validate the user input
+	 * 
+	 * @param farmIDTextField - the farm ID field user enters string into
+	 * @param yearTextField   - the year field the user enters year into
+	 * @return - false if any input is invalid, true otherwise
+	 */
+	private boolean validateInfo(TextField farmIDTextField,
+			TextField yearTextField) {
+		// farm id not entered
+		if (farmIDTextField.getText().compareTo("") == 0) {
+			Alert alert = new Alert(AlertType.WARNING, "Must enter a Farm ID");
+			alert.setHeaderText("ERROR WARNING");
+			alert.showAndWait();
+			return false;
+		} else if (farmIndex(farmIDTextField.getText()) == -1) {
+			Alert alert = new Alert(AlertType.WARNING, "Must enter a valid Farm ID");
+			alert.setHeaderText("ERROR WARNING");
+			alert.showAndWait();
+			return false;
+		}
+		if (!isInt(yearTextField.getText())
+				&& !yearTextField.getText().equals("")) {
+			Alert alert = new Alert(AlertType.WARNING,
+					"Must enter a valid integer year or leave blank for all data");
+			alert.setHeaderText("ERROR WARNING");
+			alert.showAndWait();
+			return false;
+		}
+		return true;
 	}
 
 	/**
@@ -301,53 +297,65 @@ public class OutputStage extends Stage {
 		}
 		return -1;
 	}
-	
+
 	class FarmReport extends Stage {
 		private BorderPane root = new BorderPane();
 		private Label farmLabel;
 		private int[] milkWeight;
 
-		public FarmReport(String farmId, int year, String option, int type)
-				throws IOException {
+		public FarmReport(String farmId, int year, String option, int type) {
 			if (option.compareTo("stats") == 0)
 				statDisplay(farmId, year, type);
 			else if (option.compareTo("file") == 0)
 				fileOutput(farmId, year, type);
 		}
 
-		public void fileOutput(String farmId, int year, int type)
-				throws IOException {
+		public void fileOutput(String farmId, int year, int type) {
 			// farm report
 			if (type == 1) {
-				String csvFile = "Milk_weight_farm_report-" + outputNum + ".csv";
-				FileWriter writer = new FileWriter(csvFile);
+				File csvFile = new File(
+						"Milk_weight_farm_report-" + outputNum + ".csv");
+				FileWriter writer;
+				try {
+					writer = new FileWriter(csvFile);
 
-				writer.write("Farm ID: " + farmId + ", Year: " + year + "\n");
-				writer.write("Month,Avg Weight,Percent of Total Milk\n");
-				double percent = 0;
-				// determine if specific year or all data was requested
-				if (year == -1) {
-					milkWeight = sumWeights(farmId);
-				} else {
-					milkWeight = sumWeights(farmId, year);
-				}
-				for (int i = 1; i <= 12; i++) {
-					if (manager.totalWeight[i - 1] != 0) {
-						percent = Math.round(100 * ((double) milkWeight[i - 1]
-								/ (double) manager.totalWeight[i - 1]));
+					writer.write("Farm ID: " + farmId + ", Year: " + year + "\n");
+					writer.write("Month,Avg Weight,Percent of Total Milk\n");
+
+					double percent = 0;
+					// determine if specific year or all data was requested
+					if (year == -1) {
+						milkWeight = sumWeights(farmId);
 					} else {
-						percent = 0;
+						milkWeight = sumWeights(farmId, year);
 					}
-					writer.write(i + "," + milkWeight[i - 1] + "," + percent + "\n");
+					for (int i = 1; i <= 12; i++) {
+						if (manager.totalWeight[i - 1] != 0) {
+							percent = Math.round(100 * ((double) milkWeight[i - 1]
+									/ (double) manager.totalWeight[i - 1]));
+						} else {
+							percent = 0;
+						}
+						writer.write(i + "," + milkWeight[i - 1] + "," + percent + "\n");
+					}
+					if (writer != null) {
+						Alert alert = new Alert(AlertType.INFORMATION,
+								"New file, " + csvFile + " has been created.");
+						alert.setHeaderText("Confirmed stats file was created");
+						alert.showAndWait();
+					}
+					writer.close();
+					outputNum++;
+				} catch (IOException e) {
+					if (csvFile.delete()) {
+						Alert alert = new Alert(AlertType.INFORMATION,
+								"File did not complete building.");
+						alert.setHeaderText("There was an error in the file creation.");
+						alert.showAndWait();
+					}
+
 				}
-				if (writer != null) {
-					Alert alert = new Alert(AlertType.INFORMATION,
-							"New file, " + csvFile + " has been created.");
-					alert.setHeaderText("Confirmed stats file was created");
-					alert.showAndWait();
-				}
-				writer.close();
-				outputNum++;
+
 			}
 		}
 
@@ -388,7 +396,8 @@ public class OutputStage extends Stage {
 						percent = 0;
 					}
 					info = new Text("Month " + i + " Weight: " + milkWeight[i - 1]
-							+ " Percent of total milk across all farms for Month : " + percent);
+							+ " Percent of total milk across all farms for Month : "
+							+ percent);
 
 					vbox.getChildren().add(info);
 				}
@@ -401,7 +410,6 @@ public class OutputStage extends Stage {
 			this.setScene(new Scene(root, 500, 400));
 			this.show();
 		}
-
 
 		/**
 		 * this method is used to find the sum of all milk weights for a farm in a
