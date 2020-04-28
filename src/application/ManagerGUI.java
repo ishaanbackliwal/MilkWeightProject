@@ -116,7 +116,16 @@ public class ManagerGUI extends Application {
 				e1.printStackTrace();
 			}
 		});
-		removeButton.setOnAction(e -> new RemoveStage(farmIDTextField.getText(), manager));
+		removeButton.setOnAction(e -> {
+			if(farmIDTextField.getText().compareTo("") == 0) {
+				Alert alert = new Alert(AlertType.WARNING, "Enter a valid farm ID.");
+				alert.setHeaderText("Farm ID was left blank, please enter an ID.");
+				alert.showAndWait();
+			}	
+			else {
+				new RemoveStage(farmIDTextField.getText(), manager);
+			}
+		});
 		editButton.setOnAction(e -> new AddStage(farmIDTextField.getText(), manager));
 		displayButton.setOnAction(e -> new DisplayStage(farmIDTextField.getText(), manager));
 		outputButton.setOnAction(e -> new OutputStage(manager));

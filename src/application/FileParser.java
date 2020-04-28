@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import javafx.scene.control.Alert;
@@ -22,9 +23,10 @@ public class FileParser {
 	private Scanner sc; // scanner used to get the farm num from string
 	private boolean validFile = false;
 	private FarmManager manager;
-	private int badInput = 0;
+	ArrayList<String> fileInfo;
 
 	public FileParser(String fileName, FarmManager manager) throws NumberFormatException, IOException {
+		fileInfo = new ArrayList<String>();
 		String[] input = null;
 		String data = "-1";
 		// no matter the exception throw here, the file is not valid
@@ -48,19 +50,19 @@ public class FileParser {
 		}
 
 		if (validFile = true) {
-			// check if data in file is valid
 			try {
+				// check if data in file is valid
 				checkFileData();
 			} catch (IOException i) {
-				Alert alert = new Alert(AlertType.INFORMATION,
+				Alert alert = new Alert(AlertType.WARNING,
 						"Error occured while parsing the file! \nNo data has been added.");
 				alert.setHeaderText("Please enter a properly formatted file.");
 				alert.showAndWait();
 				return;
 			}
 			// iterate through the file and store the values in the ArrayList
-			while ((data = reader.readLine()) != null) {
-				input = data.split(",");
+			for(int i = 0; i < fileInfo.size(); i++) {
+				input = fileInfo.get(i).split(",");
 				// get farm ID as a String value to compare
 				String farmId = input[1];
 				int farmIndex = farmIndex(farmId);
@@ -68,14 +70,14 @@ public class FileParser {
 				if (farmIndex == -1) {
 					Farm newFarm = new Farm(farmId);
 					newFarm.addMilk(input[2], input[0]);
-					manager.farms.add(newFarm);
+					this.manager.farms.add(newFarm);
 					int month = Integer.parseInt(input[0].split("-")[1]);
-					manager.totalWeight[month - 1] += (int) Integer.parseInt(input[2]);
+					this.manager.totalWeight[month - 1] += (int) Integer.parseInt(input[2]);
 				} else {
 					// else farm exists so add new milk data to it
-					manager.farms.get(farmIndex).addMilk(input[2], input[0]);
+					this.manager.farms.get(farmIndex).addMilk(input[2], input[0]);
 					int month = Integer.parseInt(input[0].split("-")[1]);
-					manager.totalWeight[month - 1] += (int) Integer.parseInt(input[2]);
+					this.manager.totalWeight[month - 1] += (int) Integer.parseInt(input[2]);
 				}
 			}
 			// only gets here if entire file was parsed properly
@@ -88,30 +90,26 @@ public class FileParser {
 	}
 	/**
 	 * Checks whether the data in each file is valid or not
-	 * @throws IOException is any daya is not valid
+	 * @throws IOException is any day is not valid
 	 */
 	private void checkFileData() throws IOException {
 		String data = "-1";
 		String[] input = null;
 		while ((data = reader.readLine()) != null) {
-			try {
-				input = data.split(",");
-				// if a line does not have 3 arguments throw exception.
-				if (input.length != 3) {
-					throw new IOException();
-				}
-				// tests whether weight is an integer; will throw exception if not
-				try {
-					Integer.parseInt(input[2]);
-				}
-				catch(Exception e1) {
-					throw new IOException();
-				}
-				confirmDate(input[0]);
-			}
-			catch(IOException e) {
+			input = data.split(",");
+			// if a line does not have 3 arguments throw exception.
+			if (input.length != 3) {
 				throw new IOException();
 			}
+			// tests whether weight is an integer; will throw exception if not
+			try {
+				Integer.parseInt(input[2]);
+			}
+			catch(Exception e1) {
+				throw new IOException();
+			}
+			confirmDate(input[0]);
+			fileInfo.add(data);
 		}
 	}
 	/**
