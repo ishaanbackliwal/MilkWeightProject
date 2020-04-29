@@ -21,8 +21,13 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
+import javafx.beans.binding.StringExpression;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -36,8 +41,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -110,7 +119,7 @@ public class OutputStage extends Stage {
 				} else if (comboBox.getValue()
 						.compareTo("STAT DISPLAY: Date Range Report") == 0) {
 					// date range report statistics display
-					dateRangeReportStatDisplay();
+					dateRangeReportOutput("stat");
 				} else if (comboBox.getValue()
 						.compareTo("FILE OUTPUT: Farm Report") == 0) {
 					farmReportFileOutput("file");
@@ -125,7 +134,7 @@ public class OutputStage extends Stage {
 				} else if (comboBox.getValue()
 						.compareTo("FILE OUTPUT: Date Range Report") == 0) {
 					// date range report file output
-					dateRangeReportFileOutput();
+					dateRangeReportOutput("file");
 				}
 			}
 		};
@@ -145,9 +154,7 @@ public class OutputStage extends Stage {
 ///  							FARM REPORT									 ///
 ///																		   	 ///
 ////////////////////////////////////////////////////////////////////////////////
-	/**
-	 * FILE OUTPUT
-	 */
+
 	private void farmReportFileOutput(String type) {
 		if (inProgress == true) {
 			return;
@@ -218,9 +225,7 @@ public class OutputStage extends Stage {
 ///  							ANNUAL REPORT								 ///
 ///																		   	 ///
 ////////////////////////////////////////////////////////////////////////////////
-	/**
-	 * FILE OUTPUT
-	 */
+
 	private void annualReportOutput(String type) {
 		if (inProgress == true) {
 			return;
@@ -279,9 +284,7 @@ public class OutputStage extends Stage {
 ///  							MONTHLY REPORT								 ///
 ///																		   	 ///
 ////////////////////////////////////////////////////////////////////////////////
-	/**
-	 * FILE OUTPUT
-	 */
+
 	private void monthlyReportOutput(String type) {
 		if (inProgress == true) {
 			return;
@@ -345,17 +348,8 @@ public class OutputStage extends Stage {
 ///  						  DATE RANGE REPORT								 ///
 ///																		   	 ///
 ////////////////////////////////////////////////////////////////////////////////
-	/**
-	 * FILE OUTPUT
-	 */
-	private void dateRangeReportFileOutput() {
 
-	}
-
-	/**
-	 * STAT DISPLAY
-	 */
-	private void dateRangeReportStatDisplay() {
+	private void dateRangeReportOutput(String type) {
 
 	}
 
@@ -455,8 +449,10 @@ public class OutputStage extends Stage {
 		/**
 		 * CONSTRUCTOR
 		 * 
-		 * @param type - 1 = farm report - 2 = annual report - 3 = monthly report -
-		 *             4 = date range report
+		 * @param type - 1 = farm report 
+		 * 			   - 2 = annual report 
+		 *             - 3 = monthly report 
+		 *             - 4 = date range report
 		 */
 		public Reports(String farmId, int year, String option, int type)
 				throws Exception {
@@ -477,8 +473,10 @@ public class OutputStage extends Stage {
 		/**
 		 * FILE OUTPUT
 		 * 
-		 * @param type - 1 = farm report - 2 = annual report - 3 = monthly report -
-		 *             4 = date range report
+		 * @param type - 1 = farm report 
+		 * 			   - 2 = annual report 
+		 * 			   - 3 = monthly report 
+		 * 			   - 4 = date range report
 		 */
 		public void fileOutput(String farmId, int year, int month, int type)
 				throws Exception {
@@ -660,8 +658,10 @@ public class OutputStage extends Stage {
 		/**
 		 * STATS DISPLAY
 		 * 
-		 * @param type - 1 = farm report - 2 = annual report - 3 = monthly report -
-		 *             4 = date range report
+		 * @param type - 1 = farm report 
+		 * 			   - 2 = annual report 
+		 *             - 3 = monthly report 
+		 *             - 4 = date range report
 		 */
 		public void statDisplay(String farmId, int year, int month, int type)
 				throws Exception {
@@ -672,7 +672,9 @@ public class OutputStage extends Stage {
 
 			// farm report
 			if (type == 1) {
+				this.setTitle("Farm ID: " + farmId);
 				farmLabel = new Label("Farm ID: " + farmId);
+				farmLabel.setFont(Font.font(40));
 				root.setTop(farmLabel);
 				// see if farm ID exists
 				try {
@@ -718,22 +720,12 @@ public class OutputStage extends Stage {
 
 			// annual report
 			else if (type == 2) {
-				// scroll pane
-				ScrollPane scrollPane = new ScrollPane(vbox);
-				scrollPane.setFitToHeight(true);
-				root = new BorderPane(scrollPane);
-				root.setPadding(new Insets(15));
-
 				// stage title
+				this.setTitle("Data Report for " + year);
 				farmLabel = new Label("Data Report for " + year);
+				farmLabel.setFont(Font.font(30));
 				root.setTop(farmLabel);
-
-				// get the statistics
-				Text info;
-				info = new Text(
-						"FarmID, Total Weight for Farm, Farms Percent of Milk Compared To All Farms\n");
-				vbox.getChildren().add(info);
-				ArrayList<String> farms = findFarms(year);
+				
 				// finding total weight
 				int totalWeight = 0;
 				for (int i = 0; i < manager.farms.size(); i++) {
@@ -741,6 +733,19 @@ public class OutputStage extends Stage {
 						totalWeight += manager.farms.get(i).getWeight(m);
 					}
 				}
+				
+				// table view set up
+				ArrayList<String> farms = findFarms(year);
+				ArrayList<String> weights = new ArrayList<String>();
+				ArrayList<String> percents = new ArrayList<String>();
+				TableView<String> tableView = new TableView<String>();
+				
+				TableColumn<String, String> farmIDColumn = new TableColumn<String, String>("Farm ID");
+				farmIDColumn.setMinWidth(100);
+				TableColumn<String, String> totalWeightColumn = new TableColumn<String, String>("Total Weight");
+		        totalWeightColumn.setMinWidth(125);
+				TableColumn<String, String> percentColumn = new TableColumn<String, String>("Percent Weight Compared To All Farms");
+		        
 				double percent = 0;
 				for (int i = 0; i < farms.size(); i++) {
 					int farmWeight = sumOfFarmWeightsByYear(farms.get(i), year);
@@ -750,39 +755,57 @@ public class OutputStage extends Stage {
 					} else {
 						percent = 0;
 					}
-					info = new Text(
-							farms.get(i) + ", " + farmWeight + ", " + percent + "%\n");
-					vbox.getChildren().add(info);
+					weights.add(farmWeight + "");
+					percents.add(percent + "");
 				}
+				for (int i = 0; i < farms.size(); i++) {
+		            tableView.getItems().add(i + "");
+		        }
+				farmIDColumn.setCellValueFactory(cellData -> {
+		            int rowIndex = Integer.parseInt(cellData.getValue());
+		            return new ReadOnlyStringWrapper(farms.get(rowIndex));
+		        });
+				totalWeightColumn.setCellValueFactory(cellData -> {
+		            int rowIndex = Integer.parseInt(cellData.getValue());
+		            return new ReadOnlyStringWrapper(weights.get(rowIndex));
+		        });
+				percentColumn.setCellValueFactory(cellData -> {
+		            int rowIndex = Integer.parseInt(cellData.getValue());
+		            return new ReadOnlyStringWrapper(percents.get(rowIndex));
+		        });
+
+				tableView.getSortOrder().add(totalWeightColumn);
+				tableView.getColumns().addAll(farmIDColumn, totalWeightColumn, percentColumn); 
+				vbox.getChildren().add(tableView);
 			}
 
 			// monthly report
 			else if (type == 3) {
-				// scroll pane
-				ScrollPane scrollPane = new ScrollPane(vbox);
-				scrollPane.setFitToHeight(true);
-				root = new BorderPane(scrollPane);
-				root.setPadding(new Insets(15));
-
 				// stage title
-				farmLabel = new Label("Data Report for " + year + " in month " + month);
+				this.setTitle("Data Report for " + year + " in Month " + month);
+				farmLabel = new Label("Data Report for " + year + " in Month " + month);
+				farmLabel.setFont(Font.font(20));
 				root.setTop(farmLabel);
 
-				Text info;
-				info = new Text(
-						"FarmID,Farm Monthly Total Weight,Percent of Total Milk for Month "
-								+ month + " in " + year + "\n");
-				vbox.getChildren().add(info);
-
+				// table view set up
 				ArrayList<String> farms = findFarms(year);
+				ArrayList<String> weights = new ArrayList<String>();
+				ArrayList<String> percents = new ArrayList<String>();
+				TableView<String> tableView = new TableView<String>();
+				
+				TableColumn<String, String> farmIDColumn = new TableColumn<String, String>("Farm ID");
+				farmIDColumn.setMinWidth(100);
+				TableColumn<String, String> totalWeightColumn = new TableColumn<String, String>("Total Weight");
+		        totalWeightColumn.setMinWidth(125);
+				TableColumn<String, String> percentColumn = new TableColumn<String, String>("Percent Weight Compared To All Farms");
+				
 				int monthTotal = 0;
-
 				// find all farms with data for the given month and year
 				for (int i = 0; i < manager.farms.size(); i++) {
 					Farm farm = manager.farms.get(i);
 					for (int j = 0; j < farm.milk.size(); j++) {
 						// if the farm has milk for given month and year
-						if (farm.getMonth(j) == month && farm.getYear(i) == year) {
+						if (farm.getMonth(j) == month && farm.getYear(j) == year) {
 							// add the milk weight to total weight
 							monthTotal += farm.getWeight(j);
 							// if this farm has not been added yet
@@ -798,14 +821,32 @@ public class OutputStage extends Stage {
 					String monthId = farms.get(i);
 					int farmMonth = sumOfWeightsByMonth(monthId, year, month);
 					if (farmMonth != 0) {
-						percent = Math
-								.round(((double) farmMonth / (double) monthTotal) * 100.0);
+						percent = Math.round(((double) farmMonth / (double) monthTotal) * 100.0);
 					} else {
 						percent = 0;
 					}
-					info = new Text(monthId + ", " + farmMonth + ", " + percent + "%\n");
-					vbox.getChildren().add(info);
+					weights.add(farmMonth + "");
+					percents.add(percent + "");
 				}
+				for (int i = 0; i < farms.size(); i++) {
+		            tableView.getItems().add(i + "");
+		        }
+				farmIDColumn.setCellValueFactory(cellData -> {
+		            int rowIndex = Integer.parseInt(cellData.getValue());
+		            return new ReadOnlyStringWrapper(farms.get(rowIndex));
+		        });
+				totalWeightColumn.setCellValueFactory(cellData -> {
+		            int rowIndex = Integer.parseInt(cellData.getValue());
+		            return new ReadOnlyStringWrapper(weights.get(rowIndex));
+		        });
+				percentColumn.setCellValueFactory(cellData -> {
+		            int rowIndex = Integer.parseInt(cellData.getValue());
+		            return new ReadOnlyStringWrapper(percents.get(rowIndex));
+		        });
+
+				tableView.getSortOrder().add(totalWeightColumn);
+				tableView.getColumns().addAll(farmIDColumn, totalWeightColumn, percentColumn); 
+				vbox.getChildren().add(tableView);
 				
 			}
 
@@ -815,13 +856,11 @@ public class OutputStage extends Stage {
 			}
 
 			// create the scene
-			this.setTitle("Farm ID: " + farmId);
-			farmLabel.setFont(Font.font(40));
 			BorderPane.setAlignment(farmLabel, Pos.CENTER);
 			this.setScene(new Scene(root, 500, 400));
 			this.show();
 		}
-
+		
 		/**
 		 * Gets an array list of farm ID's that have a milk object with a certain
 		 * year specification
@@ -962,4 +1001,5 @@ public class OutputStage extends Stage {
 		}
 		return true;
 	}
+	
 }
