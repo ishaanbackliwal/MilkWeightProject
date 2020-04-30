@@ -30,7 +30,16 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-
+/**
+ * FileName: AddStage.java
+ * 
+ * The adding stage of the GUI
+ * This displays a new stage to add information to the data structure
+ * 
+ * @author Mason Batchelor: mrbatchelor@wisc.edu 
+ * 				 Ishaan Backliwal: backliwal@wisc.edu
+ *
+ */
 public class AddStage extends Stage {
 
 	private BorderPane root = new BorderPane();
@@ -128,8 +137,16 @@ public class AddStage extends Stage {
 		}
 		
 		int month = Integer.parseInt(milkDate.split("-")[1]);
+		try {
 		manager.totalWeight[month - 1] += (int) Integer.parseInt(weight);
-
+		} catch (NumberFormatException e) {
+			Alert alert = new Alert(AlertType.WARNING,
+					"Enter a valid integer milk weight.");
+			alert.setHeaderText(
+					"Milk weight must be a positive integer.");
+			alert.showAndWait();
+			return;
+		}
 		if (farmIndex == -1) {
 			// if farm does not exist must create a new one
 			Farm farm = new Farm(farmID);

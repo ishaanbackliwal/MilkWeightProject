@@ -1,3 +1,16 @@
+/**
+ * RemoveStage.java 
+ *
+ * Author: Ishaan Backliwal and Mason Batchelor
+ * Date: @date Apr 19, 2020
+ * 
+ * Course: CS400
+ * Semester: Spring 2020
+ * Lecture: 001
+ * 
+ * Other Credits: 
+ */
+
 package application;
 
 import javafx.scene.Scene;

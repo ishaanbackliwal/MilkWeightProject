@@ -1,18 +1,14 @@
 /**
- * FarmManager.java created by ishaanbackliwalApr 19, 2020
+ * FarmManager.java
  *
- * Author: Ishaan Backliwal
- * Date: @date
+ * Author: Ishaan Backliwal and Mason Batchelor
+ * Date: @date Apr 19, 2020
  * 
  * Course: CS400
  * Semester: Spring 2020
  * Lecture: 001
  * 
- * List Collaborators: name, email@wisc.edu, lecture number
- * 
  * Other Credits: 
- * 
- * Known Bugs: 
  */
 package application;
 

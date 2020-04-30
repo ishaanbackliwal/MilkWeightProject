@@ -1,3 +1,15 @@
+/**
+ * FileParser.java 
+ *
+ * Author: Mason Batchelor and Ishaan Backliwal
+ * Date: @date Apr 24, 2020
+ * 
+ * Course: CS400
+ * Semester: Spring 2020
+ * Lecture: 001
+ * 
+ * Other Credits: 
+ */
 package application;
 
 import java.io.BufferedReader;

@@ -1,28 +1,28 @@
 /**
- * Farms.java created by ishaanbackliwalApr 19, 2020
+ * Farms.java 
  *
- * Author: Ishaan Backliwal
- * Date: @date
+ * Author: Ishaan Backliwal and Mason Batchelor
+ * Date: @date Apr 19, 2020
  * 
  * Course: CS400
  * Semester: Spring 2020
  * Lecture: 001
  * 
- * List Collaborators: name, email@wisc.edu, lecture number
- * 
  * Other Credits: 
- * 
- * Known Bugs: 
  */
 package application;
 
 import java.util.ArrayList;
 import java.io.IOException;
 import java.lang.NumberFormatException;
-
+/**
+ * This is the farm class that stores an arraylist of milk objects and the farm ID
+ * @author Ishaan Backliwal and Mason Batchelor
+ *
+ */
 public class Farm {
-	public ArrayList<Milk> milk;
-	public String farmID;
+	public ArrayList<Milk> milk; // arraylist of milk objects
+	public String farmID; // farm ID
 
 	/**
 	 * Milk sub-class
