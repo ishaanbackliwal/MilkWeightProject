@@ -1,10 +1,17 @@
 package application;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -24,29 +31,30 @@ public class DisplayStage extends Stage {
 		this.manager = manager;
 		
 		// if all data requested
-		if(farmId.compareTo("all") == 0)
+		if(farmId.compareTo("all") == 0) {
 			farmLabel = new Label("All Data");
+			this.setTitle("All Data");
+		}
 		// specific farm id requested
-		else
+		else {
+			this.setTitle("Data for Farm ID: " + farmId);
 			farmLabel = new Label("Farm ID: " + farmId);
+		}
 		
 		// set up a vbox to display all values
 		VBox vbox = new VBox();
-		ScrollPane scrollPane = new ScrollPane(vbox);
-		scrollPane.setFitToHeight(true);
-		root = new BorderPane(scrollPane);
+		root = new BorderPane(vbox);
 		root.setPadding(new Insets(15));
-
-		// retrieve all the values stored in the farm location
-		getInfo(vbox, farmId);
+		
+		// retrieve all the values stored in the farm location/all farms
+		setTable(vbox, farmId);
 		
 		root.setTop(farmLabel);
 		// create the scene
-			this.setTitle("Farm ID: " + farmId);
-			farmLabel.setFont(Font.font(50));
-			BorderPane.setAlignment(farmLabel, Pos.CENTER);
-			this.setScene(new Scene(root, 500, 400));
-			this.show();
+		farmLabel.setFont(Font.font(40));
+		BorderPane.setAlignment(farmLabel, Pos.CENTER);
+		this.setScene(new Scene(root, 500, 400));
+		this.show();
 	}
 	
 	/**
@@ -64,20 +72,24 @@ public class DisplayStage extends Stage {
 		return -1;
 	}
 	/**
-	 * This method prints all of the milk info contained within the specified
-	 * farms milk array
+	 * This method creates the table and fills it with all the dat requested
 	 * 
 	 * @param vbox   - the vbox which will display all the values
 	 * @param farmID - the farmID to search for in the arraylist
 	 */
-	private void getInfo(VBox vbox, String farmId) {
+	private void setTable(VBox vbox, String farmId) {
 		Farm farm = null;
+		TableView<Object> tableView = new TableView<Object>();
+		ArrayList<String> farms = new ArrayList<String>();
+		ArrayList<String> dates = new ArrayList<String>();
+		ArrayList<Integer> weights = new ArrayList<Integer>();
 		if(farmId.compareTo("all") == 0) {
 			for(int j = 0; j < manager.farms.size(); j++) {
+				farms.add(manager.farms.get(j).farmID);
 				farm = manager.farms.get(j);
 				for (int i = 0; i < farm.milk.size(); i++) {
-					Text value = new Text(farm.getDate(i) + "; " + farm.getWeight(i) + "; " + manager.farms.get(j).farmID);
-					vbox.getChildren().addAll(value);
+					dates.add(farm.getDate(i));
+					weights.add(farm.getWeight(i));
 				}
 			}
 		}
@@ -86,11 +98,56 @@ public class DisplayStage extends Stage {
 			if (farmIndex >= 0) {
 				farm = manager.farms.get(farmIndex);
 				for (int i = 0; i < farm.milk.size(); i++) {
-					Text value = new Text(farm.getDate(i) + "; " + farm.getWeight(i));
-					vbox.getChildren().addAll(value);
+					farms.add(farmId);
+					dates.add(farm.getDate(i));
+					weights.add(farm.getWeight(i));
 				}
 			}	
 		}
+		for (int i = 0; i < farms.size(); i++) {
+			tableView.getItems().add(i + "");
+		}
+		// Make the columns for the table
+		TableColumn<Object, String> farmIDColumn = new TableColumn<Object, String>(
+				"Farm ID");
+		farmIDColumn.setMinWidth(150);
+		TableColumn<Object, Integer> weightColumn = new TableColumn<Object, Integer>(
+				"Weight");
+		weightColumn.setMinWidth(150);
+		TableColumn<Object, String> dateColumn = new TableColumn<Object, String>(
+				"Date");
+		dateColumn.setMinWidth(150);
+
+		// set sorting for farmID
+		farmIDColumn.setComparator((new Comparator<String>() {
+		    public int compare(String o1, String o2) {
+		        return extractInt(o1) - extractInt(o2);
+		    }
+
+		    int extractInt(String s) {
+		        String num = s.replaceAll("\\D", "");
+		        // return 0 if no digits found
+		        return num.isEmpty() ? 0 : Integer.parseInt(num);
+		    }
+		}));
+					
+		farmIDColumn.setCellValueFactory(cellData -> {
+			int rowIndex = Integer.parseInt((String) cellData.getValue());
+			return new ReadOnlyStringWrapper(farms.get(rowIndex));
+		});
+		weightColumn.setCellValueFactory(cellData -> {
+			int rowIndex = Integer.parseInt((String) cellData.getValue());
+			return new ReadOnlyObjectWrapper<Integer>(weights.get(rowIndex));
+		});
+		dateColumn.setCellValueFactory(cellData -> {
+			int rowIndex = Integer.parseInt((String) cellData.getValue());
+			return new ReadOnlyStringWrapper(dates.get(rowIndex));
+		});
+		tableView.getColumns().add(farmIDColumn);
+		tableView.getSortOrder().add(farmIDColumn);
+		tableView.getColumns().add(weightColumn);
+		tableView.getColumns().add(dateColumn);
+		vbox.getChildren().add(tableView);
 	}
 
 }

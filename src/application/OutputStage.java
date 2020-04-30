@@ -20,11 +20,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
@@ -78,8 +81,12 @@ public class OutputStage extends Stage {
 	int annualReportNum = 0;
 	int monthlyReportNum = 0;
 	int dateRangeReportNum = 0;
+	DecimalFormat df = new DecimalFormat("#.###");
 
 	OutputStage(FarmManager manager) {
+		// set rounding for doubles
+		df.setRoundingMode(RoundingMode.CEILING);
+		
 		this.manager = manager;
 
 		// selection drop down and button
@@ -345,13 +352,6 @@ public class OutputStage extends Stage {
 		Button doneButton = new Button("Done!");
 		Button continueButton = new Button("Continue");
 
-//		// text fields
-//		TextField yearTextField = new TextField();
-//		TextField monthTextField = new TextField();
-//		TextField dayTextField = new TextField();
-//		TextField monthEndTextField = new TextField();
-//		TextField dayEndTextField = new TextField();
-
 		VBox startDate = new VBox();
 		Label startDateLabel = new Label("Date");
 		DatePicker startDatePicker = new DatePicker();
@@ -367,28 +367,6 @@ public class OutputStage extends Stage {
 		endDatePicker.setConverter(convertDateFormat());
 		endDatePicker.requestFocus();
 		endDate.getChildren().addAll(dateLabel, endDatePicker);
-
-//		// Get input for start date
-//		VBox yearBox = new VBox();
-//		Label yearLabel = new Label("Year:");
-//		yearBox.getChildren().addAll(yearLabel, yearTextField);
-//		VBox monthBox = new VBox();
-//		Label monthLabel = new Label("Month:");
-//		monthBox.getChildren().addAll(monthLabel, monthTextField);
-//		VBox dayBox = new VBox();
-//		Label dayLabel = new Label("Day:");
-//		dayBox.getChildren().addAll(dayLabel, dayTextField);
-
-//		// get input for end date
-//		VBox monthEndBox = new VBox();
-//		Label monthEndLabel = new Label("Month:");
-//		monthEndBox.getChildren().addAll(monthEndLabel, monthEndTextField);
-//		VBox dayEndBox = new VBox();
-//		Label dayEndLabel = new Label("Day:");
-//		dayEndBox.getChildren().addAll(dayEndLabel, dayEndTextField);
-//		HBox endDateBox = new HBox();
-//		endDateBox.getChildren().addAll(monthEndBox, dayEndBox);
-//		endDateBox.setAlignment(Pos.CENTER);
 
 		// combine all input displays for final scene
 		startDate.setAlignment(Pos.TOP_CENTER);
@@ -621,9 +599,9 @@ public class OutputStage extends Stage {
 
 		public Reports(String startYear, String endYear, String option) {
 			if (option.compareTo("stats") == 0)
-				rangeDisplay(startYear, endYear);
+				rangeStatDisplay(startYear, endYear);
 			else if (option.compareTo("file") == 0)
-				rangeFile(startYear, endYear);
+				rangeFileOutput(startYear, endYear);
 		}
 
 		/**
@@ -633,7 +611,7 @@ public class OutputStage extends Stage {
 		 * @param startYear - the beginning date desired
 		 * @param endYear   - the end date desired
 		 */
-		private void rangeDisplay(String startDate, String endDate) {
+		private void rangeStatDisplay(String startDate, String endDate) {
 			// set up a vbox to display all values
 			VBox vbox = new VBox();
 			root = new BorderPane(vbox);
@@ -682,13 +660,12 @@ public class OutputStage extends Stage {
 				int farmWeight = getRangeWeight(range.get(i), startMonth, startDay,
 						endMonth, endDay);
 				if (farmWeight != 0) {
-					percent = Math
-							.round(((double) farmWeight / (double) totalWeight) * 100.0);
+					percent = (((double) farmWeight / (double) totalWeight) * 100.0);
 				} else {
 					percent = 0;
 				}
 				weights.add(farmWeight);
-				percents.add(percent + "");
+				percents.add(df.format(percent) + "%");
 			}
 			for (int i = 0; i < farms.size(); i++) {
 				tableView.getItems().add(i + "");
@@ -698,12 +675,11 @@ public class OutputStage extends Stage {
 			TableColumn<Object, String> farmIDColumn = new TableColumn<Object, String>(
 					"Farm ID");
 			farmIDColumn.setMinWidth(100);
-			farmIDColumn.setSortable(false);
 			TableColumn<Object, Integer> totalWeightColumn = new TableColumn<Object, Integer>(
 					"Total Weight");
 			totalWeightColumn.setMinWidth(125);
 			TableColumn<Object, String> percentColumn = new TableColumn<Object, String>(
-					"Percent Weight Compared To All Farms in range");
+					"Percent Weight Compared To All Farms in Range");
 
 			farmIDColumn.setCellValueFactory(cellData -> {
 				int rowIndex = Integer.parseInt((String) cellData.getValue());
@@ -717,7 +693,20 @@ public class OutputStage extends Stage {
 				int rowIndex = Integer.parseInt((String) cellData.getValue());
 				return new ReadOnlyStringWrapper(percents.get(rowIndex));
 			});
+			
+			// set sorting for farmID
+			farmIDColumn.setComparator((new Comparator<String>() {
+			    public int compare(String o1, String o2) {
+			        return extractInt(o1) - extractInt(o2);
+			    }
 
+			    int extractInt(String s) {
+			        String num = s.replaceAll("\\D", "");
+			        // return 0 if no digits found
+			        return num.isEmpty() ? 0 : Integer.parseInt(num);
+			    }
+			}));
+						
 			tableView.getColumns().add(farmIDColumn);
 			tableView.getColumns().add(totalWeightColumn);
 			tableView.getSortOrder().add(totalWeightColumn);
@@ -734,11 +723,86 @@ public class OutputStage extends Stage {
 		 * This method is used to write the milk weights for all farms with data
 		 * within the date range to a file
 		 * 
-		 * @param startYear - the beginning date desired
-		 * @param endYear   - the end date desired
+		 * @param startDate - the beginning date desired
+		 * @param endDate   - the end date desired
 		 */
-		private void rangeFile(String startYear, String endYear) {
+		private void rangeFileOutput(String startDate, String endDate) {
+			
+			// 1. split input data
+			int startYear = Integer.parseInt(startDate.split("-")[0]);
+			int startMonth = Integer.parseInt(startDate.split("-")[1]);
+			int startDay = Integer.parseInt(startDate.split("-")[2]);
+			int endYear = Integer.parseInt(endDate.split("-")[0]);
+			int endMonth = Integer.parseInt(endDate.split("-")[1]);
+			int endDay = Integer.parseInt(endDate.split("-")[2]);
+			
+			// 2. find all farms in the given year
+			ArrayList<String> farms = findFarms(startYear);
+			
+			// 3. find all farms in month range
+			ArrayList<String> range = findFarms(startMonth, startDay, endMonth,
+					endDay, farms);
+			ArrayList<Integer> weights = new ArrayList<Integer>();
+			ArrayList<String> percents = new ArrayList<String>();
+			
+			int totalWeight = 0;
 
+			// Get the total weight of all valid farms
+			for (int i = 0; i < range.size(); i++) {
+				String farmId = range.get(i);
+				int index = farmIndex(farmId);
+				Farm farm = manager.farms.get(index);
+				for (int j = 0; j < farm.milk.size(); j++) {
+					// if the milk has a valid date add it to the total
+					if (farm.getYear(j) == startYear && farm.getMonth(j) >= startMonth
+							&& farm.getDay(j) >= startDay && farm.getMonth(j) <= endMonth
+							&& farm.getDay(j) <= endDay) {
+						totalWeight += farm.getWeight(j);
+					}
+				}
+			}
+			// get the weight for each farm within the range
+			double percent = 0;
+			for (int i = 0; i < range.size(); i++) {
+				int farmWeight = getRangeWeight(range.get(i), startMonth, startDay,
+						endMonth, endDay);
+				if (farmWeight != 0) {
+					percent = (((double) farmWeight / (double) totalWeight) * 100.0);
+				} else {
+					percent = 0;
+				}
+				weights.add(farmWeight);
+				percents.add(df.format(percent) + "%");
+			}
+			
+			// writing to the file
+			File csvFile = new File(
+					"Milk_weight_date_range_report-" + dateRangeReportNum + ".csv");
+			FileWriter writer;
+			
+			try {
+				writer = new FileWriter(csvFile);
+				writer.write("Start Date: " + startDate + ",End Date: " + endDate + "\n");
+				writer.write("FarmID,Total Weight in Date Range,Percent of Total Milk\n");
+				for(int i = 0; i < farms.size(); i++) {
+					writer.write(farms.get(i) + "," + weights.get(i) + "," + percents.get(i) + "\n");
+				}
+				if (writer != null) {
+					Alert alert = new Alert(AlertType.INFORMATION,
+							"New file, " + csvFile + " has been created.");
+					alert.setHeaderText("Confirmed data file was created");
+					alert.showAndWait();
+				}
+				writer.close();
+				dateRangeReportNum++;
+			} catch (Exception e) {
+				if (csvFile.delete()) {
+					Alert alert = new Alert(AlertType.INFORMATION,
+							"File did not complete building.");
+					alert.setHeaderText("There was an error in the file creation.");
+					alert.showAndWait();
+				}
+			}
 		}
 
 		private int getRangeWeight(String farmId, int startMonth, int startDay,
@@ -781,14 +845,24 @@ public class OutputStage extends Stage {
 					}
 				}
 			}
+			Collections.sort(valid, new Comparator<String>() {
+			    public int compare(String o1, String o2) {
+			        return extractInt(o1) - extractInt(o2);
+			    }
+
+			    int extractInt(String s) {
+			        String num = s.replaceAll("\\D", "");
+			        // return 0 if no digits found
+			        return num.isEmpty() ? 0 : Integer.parseInt(num);
+			    }
+			});
 			return valid;
 		}
 
 		/**
 		 * FILE OUTPUT
 		 * 
-		 * @param type - 1 = farm report - 2 = annual report - 3 = monthly report -
-		 *             4 = date range report
+		 * @param type - 1 = farm report - 2 = annual report - 3 = monthly report
 		 */
 		public void fileOutput(String farmId, int year, int month, int type)
 				throws Exception {
@@ -823,12 +897,12 @@ public class OutputStage extends Stage {
 					}
 					for (int i = 1; i <= 12; i++) {
 						if (manager.totalWeight[i - 1] != 0) {
-							percent = Math.round(100 * ((double) milkWeight[i - 1]
+							percent = (100 * ((double) milkWeight[i - 1]
 									/ (double) manager.totalWeight[i - 1]));
 						} else {
 							percent = 0;
 						}
-						writer.write(i + "," + milkWeight[i - 1] + "," + percent + "\n");
+						writer.write(i + "," + milkWeight[i - 1] + "," + df.format(percent) + "\n");
 					}
 					if (writer != null) {
 						Alert alert = new Alert(AlertType.INFORMATION,
@@ -856,7 +930,7 @@ public class OutputStage extends Stage {
 						"Milk_weight_annual_report-" + annualReportNum + ".csv");
 				FileWriter writer;
 				ArrayList<String> farms = findFarms(year);
-
+				
 				// find total weight
 				int totalWeight = 0;
 				for (int i = 0; i < manager.farms.size(); i++) {
@@ -873,13 +947,12 @@ public class OutputStage extends Stage {
 					for (int i = 0; i < farms.size(); i++) {
 						int farmWeight = sumOfFarmWeightsByYear(farms.get(i), year);
 						if (farmWeight != 0) {
-							percent = Math
-									.round(((double) farmWeight / (double) totalWeight) * 100.0);
+							percent = (((double) farmWeight / (double) totalWeight) * 100.0);
 						} else {
 							percent = 0;
 						}
 						writer
-								.write(farms.get(i) + "," + farmWeight + "," + percent + "\n");
+								.write(farms.get(i) + "," + farmWeight + "," + df.format(percent) + "\n");
 					}
 					if (writer != null) {
 						Alert alert = new Alert(AlertType.INFORMATION,
@@ -912,7 +985,7 @@ public class OutputStage extends Stage {
 					Farm farm = manager.farms.get(i);
 					for (int j = 0; j < farm.milk.size(); j++) {
 						// if the farm has milk for given month and year
-						if (farm.getMonth(j) == month && farm.getYear(i) == year) {
+						if (farm.getMonth(j) == month && farm.getYear(j) == year) {
 							// add the milk weight to total weight
 							monthTotal += farm.getWeight(j);
 							// if this farm has not been added yet
@@ -935,12 +1008,11 @@ public class OutputStage extends Stage {
 						String monthId = farms.get(i);
 						int farmMonth = sumOfWeightsByMonth(monthId, year, month);
 						if (farmMonth != 0) {
-							percent = Math
-									.round(((double) farmMonth / (double) monthTotal) * 100.0);
+							percent = (((double) farmMonth / (double) monthTotal) * 100.0);
 						} else {
 							percent = 0;
 						}
-						writer.write(monthId + ", " + farmMonth + ", " + percent + "%\n");
+						writer.write(monthId + ", " + farmMonth + ", " + df.format(percent) + "\n");
 					}
 					writer.write("\nTotal milk weight for the month is " + monthTotal);
 					if (writer != null) {
@@ -960,18 +1032,12 @@ public class OutputStage extends Stage {
 					}
 				}
 			}
-
-			// DATE RNAGE REPORT
-			if (type == 4) {
-
-			}
 		}
 
 		/**
 		 * STATS DISPLAY
 		 * 
-		 * @param type - 1 = farm report - 2 = annual report - 3 = monthly report -
-		 *             4 = date range report
+		 * @param type - 1 = farm report - 2 = annual report - 3 = monthly report
 		 */
 		public void statDisplay(String farmId, int year, int month, int type)
 				throws Exception {
@@ -982,10 +1048,37 @@ public class OutputStage extends Stage {
 
 			// farm report
 			if (type == 1) {
+				// stage title
 				this.setTitle("Farm ID: " + farmId);
 				farmLabel = new Label("Farm ID: " + farmId);
 				farmLabel.setFont(Font.font(40));
 				root.setTop(farmLabel);
+				
+				// table view set up
+				ArrayList<Integer> months = new ArrayList<Integer>();
+				ArrayList<Integer> weights = new ArrayList<Integer>();
+				ArrayList<String> percents = new ArrayList<String>();
+				TableView<Object> tableView = new TableView<Object>();
+				
+				// Make the columns for the table
+				TableColumn<Object, Integer> monthColumn = new TableColumn<Object, Integer>(
+						"Month");
+				monthColumn.setMinWidth(100);
+				TableColumn<Object, Integer> avgWeightColumn = new TableColumn<Object, Integer>(
+						"Average Weight");
+				avgWeightColumn.setMinWidth(125);
+				TableColumn<Object, String> percentColumn;
+				if(year == -1) {
+					milkWeight = sumWeights(farmId);
+					percentColumn = new TableColumn<Object, String>(
+							"Percent of Month Total");
+				}
+				else {
+					milkWeight = sumWeights(farmId, year);
+					percentColumn = new TableColumn<Object, String>(
+							"Percent of Month Total for " + year);
+				}
+				
 				// see if farm ID exists
 				try {
 					sumWeights(farmId);
@@ -996,36 +1089,44 @@ public class OutputStage extends Stage {
 					alert.showAndWait();
 					return;
 				}
-				// get the statistics
-				Text info;
-				// determine is specific year or all data was requested
-				if (year == -1) {
-					milkWeight = sumWeights(farmId);
-					info = new Text(
-							"Average farm weights per month, and percentage of month totals for all data.\n");
-					vbox.getChildren().add(info);
-				} else {
-					milkWeight = sumWeights(farmId, year);
-					info = new Text(
-							"Average farm weights per month, and percentage of month totals for the year "
-									+ year + ".\n");
-					vbox.getChildren().add(info);
-				}
+
 				double percent = 0;
 
 				for (int i = 1; i <= 12; i++) {
 					if (manager.totalWeight[i - 1] != 0) {
-						percent = Math.round(100 * ((double) milkWeight[i - 1]
+						percent = (100 * ((double) milkWeight[i - 1]
 								/ (double) manager.totalWeight[i - 1]));
 					} else {
 						percent = 0;
 					}
-					info = new Text("Month " + i + " Weight: " + milkWeight[i - 1]
-							+ " Percent of total milk across all farms for Month : " + percent
-							+ "%");
-
-					vbox.getChildren().add(info);
+					months.add(i);
+					weights.add(milkWeight[i-1]);
+					percents.add(df.format(percent) + "%");
 				}
+				
+				// set up table
+				for (int i = 0; i < 12; i++) {
+					tableView.getItems().add(i + "");
+				}
+				monthColumn.setCellValueFactory(cellData -> {
+					int rowIndex = Integer.parseInt((String) cellData.getValue());
+					return new ReadOnlyObjectWrapper<Integer>(months.get(rowIndex));
+				});
+				avgWeightColumn.setCellValueFactory(cellData -> {
+					int rowIndex = Integer.parseInt((String) cellData.getValue());
+					return new ReadOnlyObjectWrapper<>(weights.get(rowIndex));
+				});
+				percentColumn.setCellValueFactory(cellData -> {
+					int rowIndex = Integer.parseInt((String) cellData.getValue());
+					return new ReadOnlyStringWrapper(percents.get(rowIndex));
+				});
+				
+				// apply columns to table
+				tableView.getColumns().add(monthColumn);
+				tableView.getColumns().add(avgWeightColumn);
+				tableView.getColumns().add(percentColumn);
+				vbox.getChildren().add(tableView);
+				
 			}
 
 			// annual report
@@ -1065,13 +1166,12 @@ public class OutputStage extends Stage {
 				for (int i = 0; i < farms.size(); i++) {
 					int farmWeight = sumOfFarmWeightsByYear(farms.get(i), year);
 					if (farmWeight != 0) {
-						percent = Math
-								.round(((double) farmWeight / (double) totalWeight) * 100.0);
+						percent = (((double) farmWeight / (double) totalWeight) * 100.0);
 					} else {
 						percent = 0;
 					}
 					weights.add(farmWeight);
-					percents.add(percent + "");
+					percents.add(df.format(percent) + "%");
 				}
 				for (int i = 0; i < farms.size(); i++) {
 					tableView.getItems().add(i + "");
@@ -1088,7 +1188,20 @@ public class OutputStage extends Stage {
 					int rowIndex = Integer.parseInt((String) cellData.getValue());
 					return new ReadOnlyStringWrapper(percents.get(rowIndex));
 				});
+				
+				// set sorting for farm ID column
+				farmIDColumn.setComparator((new Comparator<String>() {
+				    public int compare(String o1, String o2) {
+				        return extractInt(o1) - extractInt(o2);
+				    }
 
+				    int extractInt(String s) {
+				        String num = s.replaceAll("\\D", "");
+				        // return 0 if no digits found
+				        return num.isEmpty() ? 0 : Integer.parseInt(num);
+				    }
+				}));
+				
 				tableView.getColumns().add(farmIDColumn);
 				tableView.getColumns().add(totalWeightColumn);
 				tableView.getSortOrder().add(totalWeightColumn);
@@ -1142,13 +1255,12 @@ public class OutputStage extends Stage {
 					String monthId = farms.get(i);
 					int farmMonth = sumOfWeightsByMonth(monthId, year, month);
 					if (farmMonth != 0) {
-						percent = Math
-								.round(((double) farmMonth / (double) monthTotal) * 100.0);
+						percent = (((double) farmMonth / (double) monthTotal) * 100.0);
 					} else {
 						percent = 0;
 					}
 					weights.add(farmMonth);
-					percents.add(percent + "");
+					percents.add(df.format(percent) + "%");
 				}
 				for (int i = 0; i < farms.size(); i++) {
 					tableView.getItems().add(i + "");
@@ -1166,7 +1278,20 @@ public class OutputStage extends Stage {
 					int rowIndex = Integer.parseInt((String) cellData.getValue());
 					return new ReadOnlyStringWrapper(percents.get(rowIndex));
 				});
+				
+				// set sorting for farm ID column
+				farmIDColumn.setComparator((new Comparator<String>() {
+				    public int compare(String o1, String o2) {
+				        return extractInt(o1) - extractInt(o2);
+				    }
 
+				    int extractInt(String s) {
+				        String num = s.replaceAll("\\D", "");
+				        // return 0 if no digits found
+				        return num.isEmpty() ? 0 : Integer.parseInt(num);
+				    }
+				}));
+				
 				tableView.getColumns().add(farmIDColumn);
 				tableView.getColumns().add(totalWeightColumn);
 				tableView.getSortOrder().add(totalWeightColumn);
@@ -1175,16 +1300,12 @@ public class OutputStage extends Stage {
 
 			}
 
-			// date range report
-			else if (type == 4) {
-
-			}
-
 			// create the scene
 			BorderPane.setAlignment(farmLabel, Pos.CENTER);
 			this.setScene(new Scene(root, 500, 400));
 			this.show();
 		}
+
 
 		/**
 		 * Gets an array list of farm ID's that have a milk object with a certain
@@ -1204,7 +1325,17 @@ public class OutputStage extends Stage {
 					}
 				}
 			}
-			Collections.sort(farmIDs);
+			Collections.sort(farmIDs, new Comparator<String>() {
+			    public int compare(String o1, String o2) {
+			        return extractInt(o1) - extractInt(o2);
+			    }
+
+			    int extractInt(String s) {
+			        String num = s.replaceAll("\\D", "");
+			        // return 0 if no digits found
+			        return num.isEmpty() ? 0 : Integer.parseInt(num);
+			    }
+			});
 			return farmIDs;
 		}
 
@@ -1310,21 +1441,6 @@ public class OutputStage extends Stage {
 			return averages;
 		}
 
-	}
-
-	/**
-	 * This helper method is used to determine if input is an integer
-	 * 
-	 * @param input - the user input
-	 * @return - true if the value is an int
-	 */
-	private boolean isInt(String input) {
-		try {
-			Integer.parseInt(input);
-		} catch (Exception e) {
-			return false;
-		}
-		return true;
 	}
 
 	/**
