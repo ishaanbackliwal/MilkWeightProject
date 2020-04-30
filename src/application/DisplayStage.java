@@ -24,15 +24,23 @@ import javafx.stage.Stage;
  * The display stage of the GUI This displays a new stage to present information
  * for a Farm ID or all data that has been added in
  * 
- * @author Mason Batchelor: mrbatchelor@wisc.edu 
- * 				 Ishaan Backliwal: backliwal@wisc.edu
+ * @author Mason Batchelor: mrbatchelor@wisc.edu, Ishaan Backliwal:
+ *         backliwal@wisc.edu
+ * 
+ *         Other Credits: Stack Overflow
  *
  */
 public class DisplayStage extends Stage {
 	private BorderPane root = new BorderPane();
-	private Label farmLabel;
-	private FarmManager manager;
+	private Label farmLabel; // title label for the top of the stage
+	private FarmManager manager; // manager for the back end data structure
 
+	/**
+	 * Stage to display requested data
+	 * 
+	 * @param farmId  - farm ID of the data requested or "add" to display all data
+	 * @param manager - manager for the back end data structure
+	 */
 	public DisplayStage(String farmId, FarmManager manager) {
 		this.manager = manager;
 
@@ -55,8 +63,8 @@ public class DisplayStage extends Stage {
 		// retrieve all the values stored in the farm location/all farms
 		setTable(vbox, farmId);
 
-		root.setTop(farmLabel);
 		// create the scene
+		root.setTop(farmLabel);
 		farmLabel.setFont(Font.font(40));
 		BorderPane.setAlignment(farmLabel, Pos.CENTER);
 		this.setScene(new Scene(root, 500, 400));
@@ -86,23 +94,29 @@ public class DisplayStage extends Stage {
 	 */
 	private void setTable(VBox vbox, String farmId) {
 		Farm farm = null;
-		TableView<Object> tableView = new TableView<Object>();
+
+		// array lists for data to add to columns
 		ArrayList<String> farms = new ArrayList<String>();
 		ArrayList<String> dates = new ArrayList<String>();
 		ArrayList<Integer> weights = new ArrayList<Integer>();
+		// for all data requested
 		if (farmId.compareTo("all") == 0) {
+			// go through all farms and add each data point to array lists
 			for (int j = 0; j < manager.farms.size(); j++) {
-				farms.add(manager.farms.get(j).farmID);
 				farm = manager.farms.get(j);
 				for (int i = 0; i < farm.milk.size(); i++) {
+					farms.add(manager.farms.get(j).farmID);
 					dates.add(farm.getDate(i));
 					weights.add(farm.getWeight(i));
 				}
 			}
-		} else {
+		}
+		// for specific farm
+		else {
 			int farmIndex = this.farmIndex(farmId);
 			if (farmIndex >= 0) {
 				farm = manager.farms.get(farmIndex);
+				// go through requested farm's data and add info to array lists
 				for (int i = 0; i < farm.milk.size(); i++) {
 					farms.add(farmId);
 					dates.add(farm.getDate(i));
@@ -110,18 +124,18 @@ public class DisplayStage extends Stage {
 				}
 			}
 		}
+
+		// set up table
+		TableView<Object> tableView = new TableView<Object>();
 		for (int i = 0; i < farms.size(); i++) {
 			tableView.getItems().add(i + "");
 		}
 		// Make the columns for the table
-		TableColumn<Object, String> farmIDColumn = new TableColumn<Object, String>(
-				"Farm ID");
+		TableColumn<Object, String> farmIDColumn = new TableColumn<Object, String>("Farm ID");
 		farmIDColumn.setMinWidth(150);
-		TableColumn<Object, Integer> weightColumn = new TableColumn<Object, Integer>(
-				"Weight");
+		TableColumn<Object, Integer> weightColumn = new TableColumn<Object, Integer>("Weight");
 		weightColumn.setMinWidth(150);
-		TableColumn<Object, String> dateColumn = new TableColumn<Object, String>(
-				"Date");
+		TableColumn<Object, String> dateColumn = new TableColumn<Object, String>("Date");
 		dateColumn.setMinWidth(150);
 
 		// set sorting for farmID
@@ -137,6 +151,7 @@ public class DisplayStage extends Stage {
 			}
 		}));
 
+		// fill each cell with the appropriate data
 		farmIDColumn.setCellValueFactory(cellData -> {
 			int rowIndex = Integer.parseInt((String) cellData.getValue());
 			return new ReadOnlyStringWrapper(farms.get(rowIndex));
@@ -149,6 +164,8 @@ public class DisplayStage extends Stage {
 			int rowIndex = Integer.parseInt((String) cellData.getValue());
 			return new ReadOnlyStringWrapper(dates.get(rowIndex));
 		});
+
+		// add columns to table and add table to vbox
 		tableView.getColumns().add(farmIDColumn);
 		tableView.getSortOrder().add(farmIDColumn);
 		tableView.getColumns().add(weightColumn);

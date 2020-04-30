@@ -48,20 +48,21 @@ import javafx.stage.Stage;
  * 
  * @author Mason Batchelor: mrbatchelor@wisc.edu Ishaan Backliwal:
  *         backliwal@wisc.edu
+ * 
+ * Other Credits: Stack Overflow
  *
  */
 public class ManagerGUI extends Application {
-	// store any command-line arguments that were entered.
-	// NOTE: this.getParameters().getRaw() will get these also
 
-	private List<String> args;
-
-	private static final int WINDOW_WIDTH = 650;
-	private static final int WINDOW_HEIGHT = 500;
+	private static final int WINDOW_WIDTH = 650;	// width of main menu window
+	private static final int WINDOW_HEIGHT = 500;	// height of main menu window
 	private static final String APP_TITLE = "Milk Manager";
-	private FarmManager manager = new FarmManager();
-
+	private FarmManager manager = new FarmManager();	// back end DS manager
+	
 	@Override
+	/**
+	 * Stage for the main menu
+	 */
 	public void start(Stage primaryStage) throws Exception {
 
 		// Buttons
@@ -84,20 +85,19 @@ public class ManagerGUI extends Application {
 		BorderPane root = new BorderPane();
 		root.setPadding(new Insets(30, 30, 100, 30));
 
-		// Title horizontal box
+		// Title hbox
 		HBox hboxTitle = new HBox(10);
 		hboxTitle.getChildren().add(tile);
 		hboxTitle.setAlignment(Pos.TOP_CENTER);
 		root.setTop(hboxTitle);
 
-		// Button vertical box
+		// Button vbox
 		VBox allButtons = new VBox(15);
 		HBox hboxButtons = new HBox(10);
 		hboxButtons.getChildren().addAll(addButton, removeButton, displayButton,
 				outputButton);
 		hboxButtons.setAlignment(Pos.BOTTOM_CENTER);
 		allButtons.getChildren().add(hboxButtons);
-		// hboxButtons.setPadding(new Insets(0, 0, 100, 0));
 		root.setBottom(allButtons);
 
 		// File name text field
@@ -131,7 +131,6 @@ public class ManagerGUI extends Application {
 		helpBox.setAlignment(Pos.BOTTOM_CENTER);
 		allButtons.getChildren().add(helpBox);
 		allButtons.setAlignment(Pos.BOTTOM_CENTER);
-		// allButtons.setPadding(new Insets(40, 0, 0, 0));
 
 		// Create new pop up windows taking text input
 		// Checks for bad input on button press
@@ -143,41 +142,40 @@ public class ManagerGUI extends Application {
 				e1.printStackTrace();
 			}
 		});
+		
 		// remove button
 		removeButton.setOnAction(e -> {
 			// farm id is left blank
 			if (farmIDTextField.getText().compareTo("") == 0) {
-				Alert alert = new Alert(AlertType.WARNING,
-						"Please enter a valid farm ID to remove data.");
-				alert.setHeaderText("ERROR: Farm ID was left blank.");
-				alert.showAndWait();
+				new RemoveStage("all", manager);
 			}
-			// farm id does not exist among inputted data
+			// farm id does not exist among inputed data, alert user
 			else if (!manager.containsFarm(farmIDTextField.getText())) {
 				Alert alert = new Alert(AlertType.WARNING,
-						"Please enter a valid farm ID to remove data.");
+						"Please enter a valid farm ID to remove data,\nor leave field blank to display all data.\nThis field is CASE SENSITIVE.");
 				alert.setHeaderText("ERROR: Farm ID does not exist.");
 				alert.showAndWait();
 			}
-			// open farm id to remove data
+			// open requested farm id to remove data
 			else {
 				new RemoveStage(farmIDTextField.getText(), manager);
 			}
 		});
+		
 		// display button
 		displayButton.setOnAction(e -> {
 			// farm id was left blank
 			if (farmIDTextField.getText().compareTo("") == 0) {
 				new DisplayStage("all", manager);
 			}
-			// farm id entered does not exist
+			// farm id entered does not exist, alert user
 			else if (!manager.containsFarm(farmIDTextField.getText())) {
 				Alert alert = new Alert(AlertType.WARNING,
-						"Please enter a valid farm ID to display data.\n (or leave field blank to display all data)");
+						"Please enter a valid farm ID to display data,\nor leave field blank to display all data.\nThis field is CASE SENSITIVE.");
 				alert.setHeaderText("ERROR: Farm ID does not exist.");
 				alert.showAndWait();
 			}
-			// open farm id to display data
+			// open requested farm id to display data
 			else {
 				new DisplayStage(farmIDTextField.getText(), manager);
 			}
@@ -196,33 +194,45 @@ public class ManagerGUI extends Application {
 				new OutputStage(manager);
 			}
 		});
-		// Help button
+		
+		// help button
 		helpButton.setOnAction(e -> {
 			new HelpStage();
 		});
 
-		// Create the main scene
+		// create the main scene
 		Scene mainScene = new Scene(root, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-		// Add the stuff and set the primary stage
+		// set the primary stage
 		primaryStage.setTitle(APP_TITLE);
 		primaryStage.setScene(mainScene);
 		primaryStage.show();
 	}
-
+	
+	/**
+	 * Determines whether the user wants to add a file or add/manipulate an existing farm
+	 * 
+	 * @param farmNum - farm ID text field info
+	 * @param newFile - file name text field info
+	 * @throws NumberFormatException
+	 * @throws IOException
+	 */
 	private void fileOrFarm(TextField farmNum, TextField newFile)
 			throws NumberFormatException, IOException {
+		
 		// get the text from both fields
 		String farmId = farmNum.getText();
 		String farmFile = newFile.getText();
 		// determine which field user has text in
 		if (farmId.equals("") && !farmFile.equals("")) {
 			// if the user has entered a file, parse the file
-			FileParser parser = new FileParser(farmFile, this.manager);
-		} else if (!farmId.equals("") && farmFile.equals("")) {
+			new FileParser(farmFile, this.manager);
+		} 
+		else if (!farmId.equals("") && farmFile.equals("")) {
 			// otherwise they want to add to a specific farm
 			new AddStage(farmId, manager);
-		} else {
+		} 
+		else {
 			// otherwise alert the user to add a farm id or file name
 			Alert alert = new Alert(AlertType.WARNING, "Enter a file OR a farm.");
 			alert.setHeaderText("Must enter a Farm ID number (OR) a file name.");
