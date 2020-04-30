@@ -149,5 +149,14 @@ public class Farm {
 	public int getMonth(int index) {
 		return milk.get(index).getMonth();
 	}
+	/**
+	 * Getter method for the day of milk
+	 * 
+	 * @return
+	 */
+	public int getDay(int index) {
+		return milk.get(index).getDay();
+	}
+
 
 }
