@@ -102,7 +102,7 @@ public class ManagerGUI extends Application {
 
 		// File name text field
 		VBox vboxFileName = new VBox(10);
-		Label fileNameLabel = new Label("File Name");
+		Label fileNameLabel = new Label("CSV File Name");
 		vboxFileName.setAlignment(Pos.CENTER);
 		vboxFileName.getChildren().addAll(fileNameLabel, fileNameTextField);
 

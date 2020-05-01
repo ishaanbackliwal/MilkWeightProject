@@ -26,7 +26,7 @@ import javafx.scene.control.Alert.AlertType;
 /**
  * This class is designed to parse the file of farms.
  * 
- * @author Mason Batchelor mrbatchelor@wisc.edu Ishaan Backliwal
+ * @author Mason Batchelor: mrbatchelor@wisc.edu Ishaan Backliwal:
  *         backliwal@wisc.edu
  *
  */

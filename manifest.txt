@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Created-By: deppeler
+Created-By: batchelor
 Class-Path: json-simple-1.1.1.jar
-Main-Class: application.Main
+Main-Class: application.ManagerGUI
 
