@@ -46,8 +46,8 @@ import javafx.stage.Stage;
  * Milk Manager GUI class 
  * This is the primary class that runs our GUI
  * 
- * @author Mason Batchelor: mrbatchelor@wisc.edu Ishaan Backliwal:
- *         backliwal@wisc.edu
+ * @author Mason Batchelor: mrbatchelor@wisc.edu 
+ * 				 Ishaan Backliwal: backliwal@wisc.edu
  * 
  * Other Credits: Stack Overflow
  *
